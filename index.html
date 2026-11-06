@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Oregon Trail: Frontier Destiny — 1848</title>
+    <!-- Tailwind CSS for robust layout and responsive utility -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for authentic colonial & frontier adventure typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=IM+Fell+English:ital@0;1&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Pirata+One&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        missionWood: '#21150c',
+                        missionWoodLight: '#3a2618',
+                        missionBrass: '#c29b38',
+                        missionBrassBright: '#f5cb5c',
+                        missionParchment: '#f5ebd7',
+                        missionParchmentDark: '#dfcaa7',
+                        missionInk: '#1a120b',
+                        missionRed: '#7a1f1d',
+                        missionGreen: '#2a4d32',
+                        missionBlue: '#223c52'
+                    },
+                    fontFamily: {
+                        cinzel: ['"Cinzel"', 'serif'],
+                        imfell: ['"IM Fell English"', 'serif'],
+                        baskerville: ['"Libre Baskerville"', 'serif'],
+                        pirata: ['"Pirata One"', 'cursive']
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        :root {
+            --parchment-texture: radial-gradient(circle, #fbf4e6 0%, #edd8be 75%, #d8bf9e 100%);
+        }
+        body {
+            background-color: #0b0704;
+            background-image: radial-gradient(ellipse at center, #26190f 0%, #070503 100%);
+            font-family: 'Libre Baskerville', Georgia, serif;
+            color: #1a120b;
+            user-select: none;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .mission-outer-bevel {
+            box-shadow: 
+                0 0 0 2px #0a0604,
+                0 0 0 5px #4a3220,
+                0 0 0 8px #21150c,
+                0 0 0 11px #c29b38,
+                inset 0 0 35px rgba(0, 0, 0, 0.8),
+                0 25px 60px rgba(0,0,0,0.95);
+        }
+        .brass-rivet {
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle at 35% 35%, #fff2a8 0%, #c29b38 60%, #5c440d 100%);
+            border-radius: 50%;
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.7);
+        }
+        .parchment-panel {
+            background: var(--parchment-texture);
+            box-shadow: inset 0 0 30px rgba(100, 65, 30, 0.25);
+        }
+        .portrait-frame {
+            box-shadow: 
+                0 0 0 2px #1a120b,
+                0 0 0 4px #c29b38,
+                0 4px 10px rgba(0,0,0,0.6);
+        }
+        .action-card {
+            background: linear-gradient(180deg, #fdf8ee 0%, #eedbc1 100%);
+            border: 2px solid #8e6c46;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .action-card:hover {
+            transform: translateY(-2px);
+            border-color: #c29b38;
+            box-shadow: 0 6px 14px rgba(60, 40, 20, 0.35);
+        }
+        .action-card:active {
+            transform: translateY(1px);
+        }
+        /* Vintage Scrollbars */
+        ::-webkit-scrollbar { width: 7px; }
+        ::-webkit-scrollbar-track { background: #dfcaa7; }
+        ::-webkit-scrollbar-thumb { background: #8e6c46; border-radius: 3px; }
+    </style>
+</head>
+<body class="w-screen h-screen flex items-center justify-center p-0 md:p-3">
+
+    <!-- MASTER CONTAINER (Mission US 16:9 Interactive Screen Frame) -->
+    <div id="game-stage" class="relative w-full h-full max-w-[1580px] max-h-[960px] bg-missionWood mission-outer-bevel rounded-lg flex flex-col overflow-hidden">
+        
+        <!-- CORNER BRASS RIVETS -->
+        <div class="absolute top-2 left-2 z-50 brass-rivet"></div>
+        <div class="absolute top-2 right-2 z-50 brass-rivet"></div>
+        <div class="absolute bottom-2 left-2 z-50 brass-rivet"></div>
+        <div class="absolute bottom-2 right-2 z-50 brass-rivet"></div>
+
+        <!-- TOP MISSION US HUD / STATUS RIBBON -->
+        <header class="bg-gradient-to-b from-missionWoodLight via-missionWood to-[#150d07] text-missionParchment px-4 py-2 border-b-2 border-missionBrass flex items-center justify-between shrink-0 shadow-lg z-20">
+            <!-- Crest and Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full border border-missionBrass bg-black/50 flex items-center justify-center text-missionBrassBright shadow-inner">
+                    <i data-lucide="compass" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-cinzel font-bold text-xs sm:text-sm tracking-widest uppercase text-missionBrassBright drop-shadow">
+                        The Oregon Trail: Frontier Destiny
+                    </h1>
+                    <span id="current-chapter-title" class="text-[11px] font-imfell text-missionParchmentDark tracking-wide italic">
+                        Prologue: The Outfitting at Independence
+                    </span>
+                </div>
+            </div>
+
+            <!-- Expedition Telemetry Pills (Historical Mission HUD) -->
+            <div class="hidden lg:flex items-center space-x-4 text-xs font-cinzel">
+                <div class="flex items-center space-x-1.5 bg-black/40 px-3 py-1 rounded border border-missionBrass/40 text-amber-200">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-missionBrass"></i>
+                    <span>Distance: <b id="ui-miles" class="text-white">0</b> / 2,000 mi</span>
+                </div>
+                <div class="flex items-center space-x-1.5 bg-black/40 px-3 py-1 rounded border border-missionBrass/40 text-amber-200">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-missionBrass"></i>
+                    <span id="ui-date" class="text-white">April 12, 1848</span>
+                </div>
+                <div class="flex items-center space-x-1.5 bg-black/40 px-3 py-1 rounded border border-missionBrass/40 text-amber-200">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-missionBrass"></i>
+                    <span id="ui-weather" class="text-white">Fair & Mild</span>
+                </div>
+                <div class="flex items-center space-x-1.5 bg-black/40 px-3 py-1 rounded border border-missionBrass/40 text-amber-200">
+                    <i data-lucide="activity" class="w-3.5 h-3.5 text-missionBrass"></i>
+                    <span>Oxen: <b id="ui-oxen-cond" class="text-emerald-400">Robust</b></span>
+                </div>
+            </div>
+
+            <!-- Global Action Controls -->
+            <div class="flex items-center space-x-2">
+                <button onclick="audio.toggleMute()" id="btn-audio" title="Sound Effects" class="p-1.5 rounded bg-missionWood hover:bg-black border border-missionBrass/60 text-missionBrassBright transition">
+                    <i data-lucide="volume-2" class="w-4 h-4" id="audio-icon"></i>
+                </button>
+                <button onclick="openModal('roster-modal')" title="Party Roster & Names" class="px-2.5 py-1 text-xs font-cinzel uppercase bg-missionWood hover:bg-black text-missionParchment border border-missionBrass/60 rounded flex items-center space-x-1 transition">
+                    <i data-lucide="users" class="w-3.5 h-3.5 text-missionBrassBright"></i>
+                    <span class="hidden sm:inline">Roster</span>
+                </button>
+                <button onclick="openModal('badges-modal')" title="Honor Badges" class="px-2.5 py-1 text-xs font-cinzel uppercase bg-missionWood hover:bg-black text-missionParchment border border-missionBrass/60 rounded flex items-center space-x-1 transition">
+                    <i data-lucide="award" class="w-3.5 h-3.5 text-missionBrassBright"></i>
+                    <span class="hidden sm:inline">Badges</span>
+                    <span id="ui-badge-pill" class="bg-missionBrass text-black px-1.5 py-0.2 rounded-full font-bold text-[10px]">0</span>
+                </button>
+                <button onclick="toggleFullscreen()" title="Fullscreen Mode" class="p-1.5 rounded bg-missionWood hover:bg-black border border-missionBrass/60 text-missionBrassBright transition">
+                    <i data-lucide="maximize" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN VIEWPORT (Cinema Scene Art & Interactive Mission US Dialogue Box) -->
+        <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0 bg-black overflow-hidden relative">
+            
+            <!-- LEFT 8.5 COLS: CINEMATIC ART & NARRATIVE DIALOGUE AREA -->
+            <section class="lg:col-span-8 xl:col-span-9 flex flex-col h-full border-r-2 border-missionWood overflow-hidden relative">
+                
+                <!-- TOP PORTION: ILLUSTRATED SCENE CANVAS -->
+                <div class="relative w-full h-[52%] sm:h-[58%] bg-[#0e0805] overflow-hidden flex items-center justify-center border-b-2 border-missionBrass">
+                    <!-- Dynamic Vector Art Scene injected here -->
+                    <div id="scene-illustration-viewport" class="w-full h-full relative"></div>
+
+                    <!-- Ambient Canvas Particle Overlay (Dust/Rain/Embers) -->
+                    <canvas id="ambient-canvas" class="absolute inset-0 pointer-events-none w-full h-full z-10"></canvas>
+
+                    <!-- Milestone Tag Overlay -->
+                    <div class="absolute top-3 left-3 bg-missionWood/85 backdrop-blur-xs text-missionParchment border border-missionBrass px-3 py-1 rounded text-xs font-cinzel tracking-wider flex items-center space-x-2 shadow-lg z-10">
+                        <i data-lucide="compass" class="w-3.5 h-3.5 text-missionBrassBright"></i>
+                        <span id="scene-milestone-tag">Independence Outpost, MO</span>
+                    </div>
+
+                    <!-- Wagon Hazard Indicator -->
+                    <div id="wagon-hazard-pill" class="hidden absolute top-3 right-3 bg-missionRed/90 text-missionParchment border border-amber-300 px-3 py-1 rounded text-xs font-cinzel tracking-wide flex items-center space-x-1.5 animate-pulse shadow-lg z-10">
+                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                        <span id="wagon-hazard-text">Broken Axle!</span>
+                    </div>
+
+                    <!-- Scene Subtitle Ticker -->
+                    <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-missionWood/95 via-missionWood/60 to-transparent p-2.5 pt-6 text-missionParchment text-xs flex justify-between items-end z-10">
+                        <span id="scene-mood-text" class="italic text-missionParchmentDark font-imfell">"The wide horizon beckons with untold peril and promise."</span>
+                        <span id="scene-pace-text" class="font-cinzel text-[10px] text-missionBrassBright uppercase">Pace: Steady | Rations: Normal</span>
+                    </div>
+                </div>
+
+                <!-- BOTTOM PORTION: MISSION US CAPTION & DIALOGUE PANEL -->
+                <div class="flex-1 parchment-panel p-4 sm:p-5 flex flex-col justify-between overflow-y-auto z-10">
+                    
+                    <!-- Dialogue Header & Character Avatar (Nano Banana illustrated style) -->
+                    <div class="flex items-start space-x-4 mb-2">
+                        <!-- Speaker Portrait Frame -->
+                        <div id="dialogue-portrait-frame" class="w-16 h-20 sm:w-20 sm:h-24 shrink-0 rounded bg-missionWood portrait-frame overflow-hidden flex items-center justify-center">
+                            <!-- Injected Vector Portrait -->
+                        </div>
+                        
+                        <!-- Dialogue & Caption Text Area -->
+                        <div class="flex-1 space-y-1">
+                            <div class="flex items-center justify-between border-b border-missionBrass/50 pb-1">
+                                <span id="story-speaker-role" class="text-xs font-cinzel font-bold tracking-widest uppercase text-missionRed">
+                                    Frontier Dispatch: Independence Register
+                                </span>
+                                <span id="story-speaker-name" class="text-xs font-imfell italic text-stone-700">Captain's Log</span>
+                            </div>
+                            <div id="story-narrative-box" class="font-baskerville text-xs sm:text-sm leading-relaxed text-missionInk">
+                                <!-- Dynamic narrative story paragraphs populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Choices Deck -->
+                    <div class="pt-2 border-t border-missionBrass/40">
+                        <div id="choices-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <!-- Choice buttons with custom miniature icons populated dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- RIGHT 3.5 COLS: EXPEDITION MANIFEST & WAGON LEDGER -->
+            <aside class="lg:col-span-4 xl:col-span-3 bg-[#e8dac0] flex flex-col h-full border-l border-missionBrass/60 overflow-y-auto z-10">
+                
+                <!-- Ledger Header -->
+                <div class="bg-missionWoodLight text-missionParchment p-3 border-b-2 border-missionBrass flex items-center justify-between shadow-xs">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="book-open" class="w-4 h-4 text-missionBrassBright"></i>
+                        <span class="font-cinzel font-bold text-xs uppercase tracking-wider">Expedition Manifest</span>
+                    </div>
+                    <button onclick="openModal('roster-modal')" class="text-[11px] font-cinzel text-missionBrassBright hover:underline flex items-center space-x-1">
+                        <i data-lucide="edit-3" class="w-3 h-3"></i>
+                        <span>Edit Names</span>
+                    </button>
+                </div>
+
+                <!-- Ledger Body Details -->
+                <div class="p-3 sm:p-4 space-y-3 font-baskerville text-xs text-missionInk flex-1 overflow-y-auto">
+                    
+                    <!-- CAPTAIN & PARTY VITALITY -->
+                    <div class="bg-missionParchment p-3 rounded border border-[#bfa682] shadow-xs space-y-2">
+                        <div class="flex justify-between items-center border-b border-[#c8b393] pb-1">
+                            <div class="flex items-center space-x-1.5">
+                                <i data-lucide="user-check" class="w-4 h-4 text-missionRed"></i>
+                                <span class="font-cinzel font-bold text-xs text-missionWood" id="ledger-captain-display">Capt. Silas Vance</span>
+                            </div>
+                            <span id="ledger-captain-role" class="font-cinzel text-[10px] bg-missionWood text-missionParchment px-2 py-0.5 rounded uppercase">Pioneer</span>
+                        </div>
+                        
+                        <!-- Dynamic Companion Listing with Health Conditions & Graves -->
+                        <div id="companions-roster-list" class="space-y-1.5 pt-1">
+                            <!-- Populated with each companion and status badges -->
+                        </div>
+                    </div>
+
+                    <!-- OXEN & WAGON RIGGING STATUS -->
+                    <div class="bg-missionParchment p-3 rounded border border-[#bfa682] shadow-xs space-y-2">
+                        <div class="flex justify-between items-center border-b border-[#c8b393] pb-1">
+                            <div class="flex items-center space-x-1.5">
+                                <i data-lucide="activity" class="w-4 h-4 text-missionGreen"></i>
+                                <span class="font-cinzel font-bold text-xs text-missionWood">Oxen Team & Rigging</span>
+                            </div>
+                            <span id="oxen-team-count" class="font-cinzel font-bold text-xs text-stone-700">4 Yokes (8 Oxen)</span>
+                        </div>
+
+                        <!-- Oxen Stamina Bar -->
+                        <div>
+                            <div class="flex justify-between text-[11px] mb-1">
+                                <span class="text-stone-700">Team Stamina:</span>
+                                <span id="oxen-stamina-val" class="font-bold text-missionGreen">100%</span>
+                            </div>
+                            <div class="w-full bg-[#d0be9f] rounded-full h-2 overflow-hidden border border-[#a89371]">
+                                <div id="oxen-bar" class="bg-missionGreen h-full transition-all duration-300" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Wagon Rigging Parts Grid -->
+                        <div class="grid grid-cols-3 gap-1 pt-1 text-[10px] text-center font-cinzel">
+                            <div id="rig-axle" class="p-1 rounded bg-[#e3d3b6] border border-[#b8a27d] text-missionGreen font-bold">Axle: OK</div>
+                            <div id="rig-wheel" class="p-1 rounded bg-[#e3d3b6] border border-[#b8a27d] text-missionGreen font-bold">Wheel: OK</div>
+                            <div id="rig-tongue" class="p-1 rounded bg-[#e3d3b6] border border-[#b8a27d] text-missionGreen font-bold">Tongue: OK</div>
+                        </div>
+                    </div>
+
+                    <!-- PROVISIONS & STORES -->
+                    <div class="bg-missionParchment p-3 rounded border border-[#bfa682] shadow-xs space-y-2">
+                        <div class="flex justify-between items-center border-b border-[#c8b393] pb-1">
+                            <span class="font-cinzel font-bold text-xs text-missionWood flex items-center space-x-1">
+                                <i data-lucide="archive" class="w-3.5 h-3.5 text-missionBrass"></i>
+                                <span>Provisions</span>
+                            </span>
+                            <span id="ledger-cash" class="font-cinzel font-bold text-xs text-missionGreen">$0.00</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div class="flex justify-between p-1.5 rounded bg-[#f2e7d3] border border-[#cbbaa0]">
+                                <span>Food Stores:</span>
+                                <b id="inv-food-lbs">0 lbs</b>
+                            </div>
+                            <div class="flex justify-between p-1.5 rounded bg-[#f2e7d3] border border-[#cbbaa0]">
+                                <span>Ammunition:</span>
+                                <b id="inv-ammo-boxes">0 bxs</b>
+                            </div>
+                            <div class="flex justify-between p-1.5 rounded bg-[#f2e7d3] border border-[#cbbaa0]">
+                                <span>Spare Parts:</span>
+                                <b id="inv-parts-count">0 sets</b>
+                            </div>
+                            <div class="flex justify-between p-1.5 rounded bg-[#f2e7d3] border border-[#cbbaa0]">
+                                <span>Medicine:</span>
+                                <b id="inv-med-bottles">3 vials</b>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRIMARY INTERACTIVE ACTION BUTTONS -->
+                    <div class="pt-1 space-y-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="startHuntingMinigame()" id="btn-hunt-action" class="py-2 px-2 bg-gradient-to-b from-[#344e41] to-[#1e2f27] hover:brightness-110 text-missionParchment border border-missionBrass rounded font-cinzel font-bold text-[11px] tracking-wider uppercase flex items-center justify-center space-x-1 shadow transition">
+                                <i data-lucide="crosshair" class="w-3.5 h-3.5 text-missionBrassBright"></i>
+                                <span>Hunt Game</span>
+                            </button>
+                            <button onclick="promptCampRest()" id="btn-rest-action" class="py-2 px-2 bg-gradient-to-b from-[#4a3b32] to-[#2b1f18] hover:brightness-110 text-missionParchment border border-missionBrass rounded font-cinzel font-bold text-[11px] tracking-wider uppercase flex items-center justify-center space-x-1 shadow transition">
+                                <i data-lucide="tent" class="w-3.5 h-3.5 text-missionBrassBright"></i>
+                                <span>Make Camp</span>
+                            </button>
+                        </div>
+                        <button onclick="advanceTrailDay()" id="btn-trail-march" class="w-full py-2.5 bg-gradient-to-b from-[#8c2d19] to-[#591a0c] hover:brightness-110 text-missionParchment border-2 border-missionBrass rounded font-cinzel font-bold text-xs tracking-widest uppercase flex items-center justify-center space-x-2 shadow-md transition">
+                            <i data-lucide="play" class="w-4 h-4 text-missionBrassBright fill-current"></i>
+                            <span>Press Forward (1 Day)</span>
+                        </button>
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </main>
+
+        <!-- FOOTER MILESTONE PROGRESS TRACKER -->
+        <footer class="bg-missionWoodLight text-missionParchmentDark px-4 py-2 border-t-2 border-missionBrass flex flex-col sm:flex-row items-center justify-between text-xs font-cinzel shrink-0 z-20">
+            <div class="flex items-center space-x-2 w-full sm:w-2/3">
+                <span class="text-[10px] uppercase text-missionBrassBright whitespace-nowrap">Independence</span>
+                <div class="w-full bg-[#1b120c] h-3 rounded-full border border-missionBrass/50 overflow-hidden relative">
+                    <div id="trail-progress-fill" class="h-full bg-gradient-to-r from-missionBrass via-amber-400 to-missionGreen transition-all duration-500" style="width: 0%;"></div>
+                </div>
+                <span class="text-[10px] uppercase text-missionBrassBright whitespace-nowrap">Willamette Valley</span>
+            </div>
+            <div class="text-[11px] text-amber-200 tracking-wider flex items-center space-x-2 mt-1 sm:mt-0">
+                <i data-lucide="navigation-2" class="w-3.5 h-3.5 text-missionBrassBright"></i>
+                <span id="footer-next-landmark">Next Landmark: Courthouse Rock (220 mi)</span>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ==================== INTERACTIVE MODALS ==================== -->
+
+    <!-- PARTY ROSTER & CUSTOMIZABLE NAMES MODAL -->
+    <div id="roster-modal" class="fixed inset-0 bg-black/85 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-missionParchment max-w-xl w-full rounded border-4 border-missionBrass p-5 shadow-2xl space-y-4 parchment-panel font-baskerville">
+            <div class="flex justify-between items-center border-b-2 border-missionWood pb-2">
+                <h3 class="font-cinzel font-bold text-base text-missionWood flex items-center space-x-2">
+                    <i data-lucide="feather" class="w-5 h-5 text-missionRed"></i>
+                    <span>Expedition Register & Names</span>
+                </h3>
+                <button onclick="closeModal('roster-modal')" class="text-missionWood hover:text-missionRed font-bold text-lg">✕</button>
+            </div>
+            <p class="text-xs text-stone-700 italic">
+                You may customize the names of your wagon party at any time, or select one of the historic pioneer preset families:
+            </p>
+
+            <!-- Preset Character Sets -->
+            <div class="flex flex-wrap gap-2 pt-1 pb-2 border-b border-[#c5b091]">
+                <button onclick="loadPresetRoster('vance')" class="px-2 py-1 text-[11px] bg-missionWood text-missionParchment rounded font-cinzel hover:bg-black">The Vance Party</button>
+                <button onclick="loadPresetRoster('sterling')" class="px-2 py-1 text-[11px] bg-missionWood text-missionParchment rounded font-cinzel hover:bg-black">The Sterling Clan</button>
+                <button onclick="loadPresetRoster('clark')" class="px-2 py-1 text-[11px] bg-missionWood text-missionParchment rounded font-cinzel hover:bg-black">The Clark Homesteaders</button>
+            </div>
+
+            <!-- Editable Fields -->
+            <div class="space-y-2.5 text-xs">
+                <div>
+                    <label class="block font-cinzel font-bold text-missionWood mb-0.5">Wagon Captain Name:</label>
+                    <input type="text" id="edit-captain-name" class="w-full px-3 py-1.5 bg-[#fdf8ee] border border-[#9d8362] rounded font-baskerville font-bold text-missionWood focus:outline-none focus:border-missionBrass">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-cinzel text-missionWood mb-0.5">Companion 1:</label>
+                        <input type="text" id="edit-comp-0" class="w-full px-2.5 py-1 bg-[#fdf8ee] border border-[#9d8362] rounded text-missionWood focus:outline-none focus:border-missionBrass">
+                    </div>
+                    <div>
+                        <label class="block font-cinzel text-missionWood mb-0.5">Companion 2:</label>
+                        <input type="text" id="edit-comp-1" class="w-full px-2.5 py-1 bg-[#fdf8ee] border border-[#9d8362] rounded text-missionWood focus:outline-none focus:border-missionBrass">
+                    </div>
+                    <div>
+                        <label class="block font-cinzel text-missionWood mb-0.5">Companion 3:</label>
+                        <input type="text" id="edit-comp-2" class="w-full px-2.5 py-1 bg-[#fdf8ee] border border-[#9d8362] rounded text-missionWood focus:outline-none focus:border-missionBrass">
+                    </div>
+                    <div>
+                        <label class="block font-cinzel text-missionWood mb-0.5">Companion 4:</label>
+                        <input type="text" id="edit-comp-3" class="w-full px-2.5 py-1 bg-[#fdf8ee] border border-[#9d8362] rounded text-missionWood focus:outline-none focus:border-missionBrass">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-3 border-t border-[#c5b091]">
+                <button onclick="saveRosterNames()" class="px-4 py-1.5 bg-missionWood hover:bg-black text-missionParchment font-cinzel font-bold text-xs uppercase tracking-wider rounded border border-missionBrass">
+                    Save Ledger
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BADGES & ACHIEVEMENT SHOWCASE MODAL -->
+    <div id="badges-modal" class="fixed inset-0 bg-black/85 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-missionParchment max-w-2xl w-full rounded border-4 border-missionBrass p-5 shadow-2xl space-y-4 parchment-panel font-baskerville max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b-2 border-missionWood pb-2">
+                <h3 class="font-cinzel font-bold text-lg text-missionWood flex items-center space-x-2">
+                    <i data-lucide="award" class="w-6 h-6 text-missionBrassBright"></i>
+                    <span>Frontier Badges of Honor</span>
+                </h3>
+                <button onclick="closeModal('badges-modal')" class="text-missionWood hover:text-missionRed font-bold text-lg">✕</button>
+            </div>
+            <p class="text-xs text-stone-700 italic">
+                Prestigious historical honors awarded to pioneers who overcome perils, master frontier survival, and reach the Pacific:
+            </p>
+            <div id="badges-list-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto pr-1 flex-1 py-1">
+                <!-- Injected Badges -->
+            </div>
+            <div class="flex justify-end pt-3 border-t border-[#c5b091]">
+                <button onclick="closeModal('badges-modal')" class="px-4 py-1.5 bg-missionWood hover:bg-black text-missionParchment font-cinzel font-bold text-xs uppercase tracking-wider rounded border border-missionBrass">
+                    Return to Trail
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUNTING MINIGAME MODAL -->
+    <div id="hunt-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-missionWood max-w-3xl w-full rounded-lg border-4 border-missionBrass p-4 shadow-2xl flex flex-col font-cinzel text-missionParchment">
+            <div class="flex justify-between items-center border-b border-missionBrass pb-2 mb-3">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="crosshair" class="w-5 h-5 text-missionBrassBright"></i>
+                    <h3 class="font-bold text-sm tracking-widest uppercase">Wild Plains Hunting Expedition</h3>
+                </div>
+                <div class="flex items-center space-x-4 text-xs">
+                    <span>Ammunition: <b id="hunt-ammo-display" class="text-amber-400">10</b> bxs</span>
+                    <span>Provisions Procured: <b id="hunt-meat-display" class="text-missionGreen">0 lbs</b></span>
+                </div>
+            </div>
+
+            <!-- Hunting Arena -->
+            <div id="hunting-gallery" class="relative w-full h-80 bg-[#141f17] border-2 border-missionBrass/60 rounded overflow-hidden cursor-crosshair select-none">
+                <!-- Background Panorama SVG -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 600 300" preserveAspectRatio="none">
+                    <rect width="600" height="180" fill="#293933"/>
+                    <polygon points="0,180 130,90 260,180" fill="#1b2823"/>
+                    <polygon points="190,180 350,60 510,180" fill="#24372f"/>
+                    <polygon points="410,180 530,100 600,180" fill="#1b2823"/>
+                    <rect y="180" width="600" height="120" fill="#2e4225"/>
+                    <circle cx="90" cy="220" r="12" fill="#21331a"/>
+                    <circle cx="390" cy="240" r="16" fill="#21331a"/>
+                    <circle cx="520" cy="210" r="14" fill="#21331a"/>
+                </svg>
+
+                <!-- Wild Game Target -->
+                <div id="hunt-target-entity" class="absolute w-20 h-14 cursor-pointer transform hover:scale-105 transition-transform" style="top: 200px; left: 100px;">
+                    <svg viewBox="0 0 100 70" class="w-full h-full drop-shadow-md">
+                        <path d="M 20 45 Q 15 25, 35 20 Q 55 15, 75 25 Q 90 28, 88 45 L 85 62 L 78 62 L 75 48 L 45 48 L 42 62 L 35 62 Z" fill="#4a2e18" stroke="#1c0f05" stroke-width="2"/>
+                        <circle cx="28" cy="24" r="10" fill="#2e1a0b"/>
+                        <polygon points="20,18 12,10 24,14" fill="#150b04"/>
+                        <circle cx="24" cy="22" r="1.5" fill="#fff"/>
+                    </svg>
+                </div>
+
+                <!-- Musket Flash & Hit Toast -->
+                <div id="hunt-shot-flash" class="absolute inset-0 bg-amber-100/20 pointer-events-none opacity-0 transition-opacity duration-100"></div>
+                <div id="hunt-feedback" class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/80 px-4 py-1 rounded border border-missionBrass text-amber-300 font-bold text-xs pointer-events-none opacity-0 transition-opacity">
+                    Direct Hit! +80 lbs Provisions
+                </div>
+            </div>
+
+            <div class="mt-3 flex justify-between items-center text-xs">
+                <span class="text-stone-400 font-baskerville italic">Aim carefully with your musket and click to fire. Game bolts fast across the tall prairie!</span>
+                <button onclick="finishHunting()" class="px-5 py-1.5 bg-gradient-to-b from-missionBrass to-amber-700 text-black font-cinzel font-bold rounded border border-amber-300 hover:brightness-110">
+                    Conclude Hunt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEMORIAL / BURIAL EPITAPH MODAL -->
+    <div id="memorial-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-missionParchment max-w-md w-full rounded border-4 border-missionBrass p-6 text-center space-y-4 parchment-panel font-baskerville">
+            <div class="w-12 h-12 mx-auto rounded-full bg-missionWood text-missionBrassBright flex items-center justify-center border border-missionBrass">
+                <i data-lucide="cross" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-cinzel font-bold text-lg text-missionWood">Frontier Memorial Service</h3>
+            <p id="memorial-text" class="text-xs text-stone-700 italic">
+                "Here lies a beloved pioneer who gave their all upon the Great Plains..."
+            </p>
+            <div class="pt-2 border-t border-[#c5b091]">
+                <button onclick="closeModal('memorial-modal'); showStandardTrailScene();" class="px-5 py-2 bg-missionWood hover:bg-black text-missionParchment font-cinzel font-bold text-xs uppercase tracking-wider rounded border border-missionBrass">
+                    Bow Heads & Press Onward
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT: SOUND SYNTHESIS, NANO BANANA PORTRAITS, GAME ENGINE -->
+    <script>
+        /* =========================================================================
+           1. WEB AUDIO API SYNTHESIZER (No External MP3/WAV Dependencies)
+           ========================================================================= */
+        class FrontierAudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+            toggleMute() {
+                this.muted = !this.muted;
+                const icon = document.getElementById('audio-icon');
+                if (this.muted) {
+                    icon.setAttribute('data-lucide', 'volume-x');
+                } else {
+                    icon.setAttribute('data-lucide', 'volume-2');
+                    this.click();
+                }
+                lucide.createIcons();
+            }
+            click() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.08);
+                } catch(e){}
+            }
+            pageTurn() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    const bufferSize = this.ctx.sampleRate * 0.12;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+                    }
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 1100;
+                    noise.connect(filter);
+                    filter.connect(this.ctx.destination);
+                    noise.start();
+                } catch(e){}
+            }
+            wagonCreak() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(90, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(140, this.ctx.currentTime + 0.18);
+                    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.22);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.22);
+                } catch(e){}
+            }
+            gunshot() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    const bufferSize = this.ctx.sampleRate * 0.4;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.15));
+                    }
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 750;
+                    noise.connect(filter);
+                    filter.connect(this.ctx.destination);
+                    noise.start();
+                } catch(e){}
+            }
+            fanfare() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    const notes = [261.6, 329.6, 392.0, 523.25];
+                    notes.forEach((freq, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.12);
+                        gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.12 + 0.35);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(this.ctx.currentTime + idx * 0.12);
+                        osc.stop(this.ctx.currentTime + idx * 0.12 + 0.35);
+                    });
+                } catch(e){}
+            }
+            dirge() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    const notes = [196.0, 185.0, 174.6, 164.8];
+                    notes.forEach((freq, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.2);
+                        gain.gain.setValueAtTime(0.15, this.ctx.currentTime + idx * 0.2);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.2 + 0.45);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(this.ctx.currentTime + idx * 0.2);
+                        osc.stop(this.ctx.currentTime + idx * 0.2 + 0.45);
+                    });
+                } catch(e){}
+            }
+        }
+        const audio = new FrontierAudioEngine();
+
+        /* =========================================================================
+           2. NANO BANANA ILLUSTRATED VECTOR PORTRAIT & SCENE SUITE
+           ========================================================================= */
+        const NanoBananaPortraits = {
+            // Captain Silas Vance
+            vance: () => `
+                <svg viewBox="0 0 100 120" class="w-full h-full object-cover">
+                    <rect width="100" height="120" fill="#2d2218"/>
+                    <!-- Wide brim pioneer hat -->
+                    <path d="M 10 38 Q 50 20, 90 38 Q 95 44, 85 45 Q 50 35, 15 45 Z" fill="#1b120c" stroke="#3a2717" stroke-width="1.5"/>
+                    <path d="M 28 36 Q 50 15, 72 36 Z" fill="#2a1a0f"/>
+                    <!-- Head & Face -->
+                    <ellipse cx="50" cy="55" rx="20" ry="24" fill="#dcb892"/>
+                    <!-- Beard -->
+                    <path d="M 32 60 Q 50 90, 68 60 Q 64 85, 50 92 Q 36 85, 32 60 Z" fill="#3a2517"/>
+                    <circle cx="43" cy="52" r="2.5" fill="#1b120c"/>
+                    <circle cx="57" cy="52" r="2.5" fill="#1b120c"/>
+                    <!-- Coat -->
+                    <path d="M 20 85 L 50 78 L 80 85 L 88 120 L 12 120 Z" fill="#4d321d" stroke="#2a1b10" stroke-width="2"/>
+                    <polygon points="46,78 54,78 52,120 48,120" fill="#c29b38"/>
+                </svg>
+            `,
+            // Doc Abigail Sterling
+            sterling: () => `
+                <svg viewBox="0 0 100 120" class="w-full h-full object-cover">
+                    <rect width="100" height="120" fill="#222b27"/>
+                    <!-- Bonnet / Hair -->
+                    <path d="M 25 35 Q 50 18, 75 35 Q 85 55, 78 80 Q 50 82, 22 80 Q 15 55, 25 35 Z" fill="#4a2e1b"/>
+                    <ellipse cx="50" cy="52" rx="18" ry="22" fill="#edd0b2"/>
+                    <circle cx="44" cy="50" r="2" fill="#21150c"/>
+                    <circle cx="56" cy="50" r="2" fill="#21150c"/>
+                    <path d="M 46 62 Q 50 65, 54 62" stroke="#8a3b2b" stroke-width="1.5" fill="none"/>
+                    <!-- Shawl / Dress -->
+                    <path d="M 18 85 Q 50 75, 82 85 L 90 120 L 10 120 Z" fill="#2f4a3c" stroke="#1c2d24" stroke-width="2"/>
+                    <circle cx="50" cy="88" r="4" fill="#c29b38"/>
+                </svg>
+            `,
+            // Jebediah Clark (Farmer / Hardy Pioneer)
+            clark: () => `
+                <svg viewBox="0 0 100 120" class="w-full h-full object-cover">
+                    <rect width="100" height="120" fill="#242618"/>
+                    <!-- Straw Hat -->
+                    <ellipse cx="50" cy="35" rx="42" ry="14" fill="#c7a760" stroke="#7d632b" stroke-width="1.5"/>
+                    <path d="M 30 35 Q 50 18, 70 35 Z" fill="#ad8e49"/>
+                    <!-- Face -->
+                    <ellipse cx="50" cy="54" rx="20" ry="22" fill="#d5aa81"/>
+                    <circle cx="43" cy="50" r="2.5" fill="#1b120c"/>
+                    <circle cx="57" cy="50" r="2.5" fill="#1b120c"/>
+                    <path d="M 38 65 Q 50 72, 62 65" stroke="#4a301a" stroke-width="2" fill="none"/>
+                    <!-- Suspenders & Plaid Shirt -->
+                    <path d="M 20 86 L 80 86 L 85 120 L 15 120 Z" fill="#8c3d2b"/>
+                    <rect x="32" y="86" width="6" height="34" fill="#282218"/>
+                    <rect x="62" y="86" width="6" height="34" fill="#282218"/>
+                </svg>
+            `,
+            // Storekeeper / Fort Commander
+            merchant: () => `
+                <svg viewBox="0 0 100 120" class="w-full h-full object-cover">
+                    <rect width="100" height="120" fill="#1c242c"/>
+                    <!-- Top Hat -->
+                    <rect x="30" y="15" width="40" height="28" fill="#151a1e"/>
+                    <ellipse cx="50" cy="43" rx="35" ry="8" fill="#1f252a"/>
+                    <!-- Face & Spectacles -->
+                    <ellipse cx="50" cy="58" rx="19" ry="22" fill="#e5c5a3"/>
+                    <circle cx="43" cy="55" r="5" fill="none" stroke="#c29b38" stroke-width="1.5"/>
+                    <circle cx="57" cy="55" r="5" fill="none" stroke="#c29b38" stroke-width="1.5"/>
+                    <line x1="48" y1="55" x2="52" y2="55" stroke="#c29b38" stroke-width="1.5"/>
+                    <!-- Vest & Cravat -->
+                    <path d="M 20 88 L 80 88 L 88 120 L 12 120 Z" fill="#324555"/>
+                    <polygon points="46,88 54,88 50,110" fill="#edd8be"/>
+                </svg>
+            `,
+            // Shoshone / River Guide
+            guide: () => `
+                <svg viewBox="0 0 100 120" class="w-full h-full object-cover">
+                    <rect width="100" height="120" fill="#291a18"/>
+                    <!-- Headband & Feather -->
+                    <line x1="58" y1="35" x2="72" y2="12" stroke="#c29b38" stroke-width="3"/>
+                    <ellipse cx="50" cy="55" rx="20" ry="23" fill="#b07d57"/>
+                    <path d="M 28 42 L 72 42" stroke="#7a1f1d" stroke-width="3"/>
+                    <!-- Braids -->
+                    <rect x="26" y="55" width="6" height="40" fill="#150f0c"/>
+                    <rect x="68" y="55" width="6" height="40" fill="#150f0c"/>
+                    <circle cx="43" cy="52" r="2.5" fill="#150f0c"/>
+                    <circle cx="57" cy="52" r="2.5" fill="#150f0c"/>
+                    <!-- Buckskin -->
+                    <path d="M 20 86 L 80 86 L 86 120 L 14 120 Z" fill="#947348" stroke="#523d24" stroke-width="2"/>
+                </svg>
+            `
+        };
+
+        /* =========================================================================
+           3. EXPEDITION CORE STATE & HISTORIC LANDMARKS
+           ========================================================================= */
+        const gameState = {
+            miles: 0,
+            targetMiles: 2000,
+            date: new Date(1848, 3, 12),
+            weather: 'Fair & Mild',
+            pace: 'Steady', // Steady, Strenuous, Grueling
+            rations: 'Normal', // Plentiful, Normal, Barebones
+
+            // Resources
+            cash: 0,
+            food: 0,
+            ammo: 0,
+            parts: 0,
+            medicine: 3,
+
+            // Captain & Profession
+            captain: {
+                name: 'Capt. Silas Vance',
+                jobId: null,
+                jobTitle: 'Pioneer',
+                health: 100,
+                status: 'Healthy',
+                portrait: 'vance'
+            },
+
+            // Companions (Full Health & Mortality System)
+            companions: [
+                { id: 0, name: 'Doc Abigail', health: 100, status: 'Healthy', affliction: null, portrait: 'sterling' },
+                { id: 1, name: 'Jebediah', health: 100, status: 'Healthy', affliction: null, portrait: 'clark' },
+                { id: 2, name: 'Maeve', health: 100, status: 'Healthy', affliction: null, portrait: 'sterling' },
+                { id: 3, name: 'Young Clara', health: 100, status: 'Healthy', affliction: null, portrait: 'sterling' }
+            ],
+
+            // Oxen & Rigging Systems
+            oxenCount: 4, // 4 yokes = 8 oxen
+            oxenStamina: 100,
+            wagonRigging: { axle: true, wheel: true, tongue: true },
+
+            // Badges Achievement Registry
+            badges: [
+                { id: 'pathfinder', title: 'Great Pathfinder', desc: 'Departed Independence and conquered the Great Plains.', unlocked: false, icon: 'compass' },
+                { id: 'river_master', title: 'River Master', desc: 'Conquered treacherous river currents without wagon losses.', unlocked: false, icon: 'anchor' },
+                { id: 'sharpshooter', title: 'Plains Sharpshooter', desc: 'Procured over 150 lbs of fresh meat in a single hunt.', unlocked: false, icon: 'crosshair' },
+                { id: 'physician', title: 'Pioneer Physician', desc: 'Cured severe cholera or mountain fever on the trail.', unlocked: false, icon: 'heart-pulse' },
+                { id: 'iron_yoke', title: 'Iron Yoke', desc: 'Preserved your oxen team across 1,000 continuous miles.', unlocked: false, icon: 'shield-check' },
+                { id: 'sole_survivor', title: 'Sole Survivor', desc: 'Persevered alone after all companions passed away.', unlocked: false, icon: 'user-x' },
+                { id: 'historian', title: 'Parchment Historian', desc: 'Visited and documented every landmark to the Pacific.', unlocked: false, icon: 'book-open' },
+                { id: 'bountiful', title: 'Bountiful Harvest', desc: 'Arrived in Oregon with over 400 lbs of rations remaining.', unlocked: false, icon: 'award' }
+            ],
+
+            // Historic Landmarks (Mission US Chapter System)
+            milestones: [
+                { miles: 0, name: 'Independence, Missouri', type: 'outpost', passed: false },
+                { miles: 220, name: 'Kansas River Crossing', type: 'river', passed: false },
+                { miles: 460, name: 'Courthouse & Jail Rock', type: 'landmark', passed: false },
+                { miles: 554, name: 'Fort Kearny Outpost', type: 'fort', passed: false },
+                { miles: 710, name: 'Chimney Rock Spire', type: 'landmark', passed: false },
+                { miles: 932, name: 'Fort Laramie', type: 'fort', passed: false },
+                { miles: 1060, name: 'Independence Rock & Sweetwater', type: 'landmark', passed: false },
+                { miles: 1210, name: 'South Pass Continental Divide', type: 'mountain', passed: false },
+                { miles: 1390, name: 'Fort Hall Trading Post', type: 'fort', passed: false },
+                { miles: 1620, name: 'Snake River Desert Crossing', type: 'river', passed: false },
+                { miles: 1800, name: 'The Dalles on Columbia River', type: 'river', passed: false },
+                { miles: 2000, name: 'Willamette Valley, Oregon', type: 'destination', passed: false }
+            ]
+        };
+
+        // 6 Mysterious Professions (NO SPOILERS GIVEN ON SELECTION)
+        const mysteriousJobs = [
+            { id: 'banker', title: 'Banker', cash: 1500, parts: 2, ammo: 15, food: 300, icon: 'coins' },
+            { id: 'blacksmith', title: 'Blacksmith', cash: 650, parts: 6, ammo: 20, food: 400, icon: 'hammer' },
+            { id: 'carpenter', title: 'Carpenter', cash: 800, parts: 5, ammo: 22, food: 350, icon: 'axe' },
+            { id: 'farmer', title: 'Farmer', cash: 450, parts: 3, ammo: 25, food: 600, icon: 'sprout' },
+            { id: 'physician', title: 'Physician', cash: 900, parts: 2, ammo: 12, food: 350, icon: 'stethoscope' },
+            { id: 'trapper', title: 'Trapper', cash: 500, parts: 2, ammo: 50, food: 500, icon: 'paw-print' }
+        ];
+
+        /* =========================================================================
+           4. AMBIENT PARTICLES (Embers, Wind Dust, Rain)
+           ========================================================================= */
+        const canvas = document.getElementById('ambient-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeAmbientCanvas() {
+            if (!canvas.parentElement) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeAmbientCanvas);
+
+        function initAmbientParticles(weatherType = 'fair') {
+            particles = [];
+            resizeAmbientCanvas();
+            const count = weatherType === 'rain' ? 70 : 25;
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: weatherType === 'rain' ? 3 : (Math.random() * 0.8 - 0.4),
+                    vy: weatherType === 'rain' ? (7 + Math.random() * 6) : (0.2 + Math.random() * 0.6),
+                    size: weatherType === 'rain' ? 1.5 : (Math.random() * 2 + 1),
+                    alpha: Math.random() * 0.4 + 0.15
+                });
+            }
+        }
+
+        function updateAmbientCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.y > canvas.height) { p.y = 0; p.x = Math.random() * canvas.width; }
+                ctx.fillStyle = `rgba(245, 235, 215, ${p.alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(updateAmbientCanvas);
+        }
+
+        /* =========================================================================
+           5. GAME SCENE & CHAPTER FLOW CONTROLLERS
+           ========================================================================= */
+
+        // Chapter 0: Job Selection (Mysterious Titles, No Perks Disclosed)
+        function showJobSelectionScene() {
+            document.getElementById('scene-illustration-viewport').innerHTML = `
+                <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                    <rect width="600" height="300" fill="#21150c"/>
+                    <rect x="40" y="30" width="520" height="240" rx="4" fill="#382415" stroke="#c29b38" stroke-width="2"/>
+                    <circle cx="300" cy="120" r="50" fill="#150d07" stroke="#c29b38" stroke-width="2"/>
+                    <path d="M 270 125 C 270 95, 330 95, 330 125 C 330 155, 270 155, 270 125 Z" fill="#dfcaa7"/>
+                    <circle cx="300" cy="102" r="14" fill="#c29b38"/>
+                    <text x="300" y="215" text-anchor="middle" font-family="Cinzel" font-size="14" fill="#f5ebd7" letter-spacing="3">EXPEDITION ENLISTMENT REGISTER</text>
+                    <text x="300" y="235" text-anchor="middle" font-family="IM Fell English" font-size="12" fill="#dfcaa7" font-style="italic">"Declare your vocation and commission your pioneer party."</text>
+                </svg>
+            `;
+            document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits.merchant();
+            document.getElementById('scene-milestone-tag').innerText = 'Independence, Missouri — Spring 1848';
+            document.getElementById('current-chapter-title').innerText = 'Chapter I: Muster Roll & Commission';
+            document.getElementById('story-speaker-role').innerText = 'Emigration Agent, Independence Courthouse:';
+            document.getElementById('story-speaker-name').innerText = 'Agent Thaddeus';
+            
+            document.getElementById('story-narrative-box').innerHTML = `
+                "Welcome to Independence, Captain. Beyond that western tree line lies two thousand miles of prairie, torrents, and jagged peaks. 
+                Before we register your covered wagon, state your trade in our register. Each trade brings its own station and fortune to the trail."
+            `;
+
+            const choices = document.getElementById('choices-container');
+            choices.innerHTML = '';
+
+            mysteriousJobs.forEach(job => {
+                const btn = document.createElement('button');
+                btn.className = 'action-card p-2.5 rounded text-left flex items-center space-x-3 text-missionInk';
+                btn.innerHTML = `
+                    <div class="w-8 h-8 rounded bg-missionWoodLight text-missionParchment flex items-center justify-center shrink-0 border border-missionBrass">
+                        <i data-lucide="${job.icon}" class="w-4 h-4 text-missionBrassBright"></i>
+                    </div>
+                    <div>
+                        <div class="font-cinzel font-bold text-xs uppercase tracking-wide text-missionWood">${job.title}</div>
+                        <div class="font-imfell text-[11px] text-stone-600 italic">Enlist as a ${job.title}</div>
+                    </div>
+                `;
+                btn.onclick = () => {
+                    audio.pageTurn();
+                    selectMysteriousJob(job);
+                };
+                choices.appendChild(btn);
+            });
+            lucide.createIcons();
+            initAmbientParticles('fair');
+        }
+
+        function selectMysteriousJob(job) {
+            gameState.captain.jobId = job.id;
+            gameState.captain.jobTitle = job.title;
+            gameState.cash = job.cash;
+            gameState.parts = job.parts;
+            gameState.ammo = job.ammo;
+            gameState.food = job.food;
+
+            unlockBadge('pathfinder');
+            updateLedgerDisplay();
+            // Allow immediate review / editing of names
+            openModal('roster-modal');
+            showIndependenceStoreScene();
+        }
+
+        // Chapter 1: Outfitting at General Store
+        function showIndependenceStoreScene() {
+            document.getElementById('scene-illustration-viewport').innerHTML = `
+                <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                    <rect width="600" height="300" fill="#446075"/>
+                    <path d="M 0 170 Q 150 140, 300 165 T 600 150 L 600 300 L 0 300 Z" fill="#523e2b"/>
+                    <!-- Store Cabin -->
+                    <rect x="180" y="85" width="240" height="135" fill="#3b2515" stroke="#1d1107" stroke-width="3"/>
+                    <polygon points="160,85 300,30 440,85" fill="#6d301e" stroke="#1d1107" stroke-width="2"/>
+                    <rect x="270" y="145" width="45" height="75" fill="#1a110a"/>
+                    <rect x="210" y="120" width="38" height="38" fill="#fde047" stroke="#1a110a" stroke-width="2"/>
+                    <rect x="340" y="120" width="38" height="38" fill="#fde047" stroke="#1a110a" stroke-width="2"/>
+                    <text x="300" y="75" text-anchor="middle" font-family="Cinzel" font-size="13" font-weight="bold" fill="#f5ebd7">GENERAL OUTFITTERS</text>
+                </svg>
+            `;
+            document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits.merchant();
+            document.getElementById('scene-milestone-tag').innerText = "Matt's Frontier Outfitters";
+            document.getElementById('current-chapter-title').innerText = 'Chapter I: Provisioning the Prairie Schooner';
+            document.getElementById('story-speaker-role').innerText = 'Matt the Merchant:';
+            document.getElementById('story-speaker-name').innerText = 'Storekeeper Matt';
+
+            document.getElementById('story-narrative-box').innerHTML = `
+                "Greetings Captain ${gameState.captain.name}! You hold $${gameState.cash}.00 in frontier cash. 
+                Do not leave Missouri without sturdy oxen, ample flour and salted bacon, gunpowder for hunting, and spare axles for rough mountain ruts."
+            `;
+
+            const choices = document.getElementById('choices-container');
+            choices.innerHTML = `
+                <button onclick="purchaseSupply('oxen', 40)" class="action-card p-2 rounded flex items-center justify-between">
+                    <span class="font-cinzel text-xs font-bold text-missionWood">Buy 1 Yoke Oxen ($40)</span>
+                    <span class="text-[11px] font-bold text-missionGreen">+2 Oxen</span>
+                </button>
+                <button onclick="purchaseSupply('food', 25)" class="action-card p-2 rounded flex items-center justify-between">
+                    <span class="font-cinzel text-xs font-bold text-missionWood">Buy 100 lbs Flour/Meat ($25)</span>
+                    <span class="text-[11px] font-bold text-missionGreen">+100 lbs</span>
+                </button>
+                <button onclick="purchaseSupply('ammo', 10)" class="action-card p-2 rounded flex items-center justify-between">
+                    <span class="font-cinzel text-xs font-bold text-missionWood">Buy 5 Boxes Ammo ($10)</span>
+                    <span class="text-[11px] font-bold text-missionGreen">+5 Boxes</span>
+                </button>
+                <button onclick="purchaseSupply('parts', 15)" class="action-card p-2 rounded flex items-center justify-between">
+                    <span class="font-cinzel text-xs font-bold text-missionWood">Buy Spare Wagon Parts ($15)</span>
+                    <span class="text-[11px] font-bold text-missionGreen">+1 Spare Set</span>
+                </button>
+                <button onclick="finishOutfitting()" class="action-card p-2.5 rounded sm:col-span-2 bg-gradient-to-r from-missionBrass to-amber-600 text-black font-cinzel font-bold text-center border-missionBrass">
+                    Embark on the Oregon Trail →
+                </button>
+            `;
+            updateLedgerDisplay();
+        }
+
+        function purchaseSupply(item, cost) {
+            if (gameState.cash < cost) {
+                audio.dirge();
+                alert("You lack the coin for this transaction!");
+                return;
+            }
+            audio.click();
+            gameState.cash -= cost;
+            if (item === 'oxen') gameState.oxenCount += 1;
+            if (item === 'food') gameState.food += 100;
+            if (item === 'ammo') gameState.ammo += 5;
+            if (item === 'parts') gameState.parts += 1;
+            updateLedgerDisplay();
+            showIndependenceStoreScene();
+        }
+
+        function finishOutfitting() {
+            if (gameState.oxenCount < 2) {
+                alert("You need at least 2 yokes of oxen to haul your laden prairie schooner!");
+                return;
+            }
+            if (gameState.food < 150) {
+                alert("You will starve within two weeks! Purchase at least 150 lbs of provisions.");
+                return;
+            }
+            audio.fanfare();
+            showStandardTrailScene();
+        }
+
+        // Standard Trail Voyage Scene (Dynamic Milestones & Decision Deck)
+        function showStandardTrailScene(eventPrompt = null) {
+            const currentMilestone = getCurrentMilestone();
+            document.getElementById('scene-illustration-viewport').innerHTML = getMilestoneIllustration(currentMilestone);
+            document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits[gameState.captain.portrait]();
+            document.getElementById('scene-milestone-tag').innerText = currentMilestone.name;
+            document.getElementById('current-chapter-title').innerText = `Expedition Chapter: The Great Emigration`;
+            document.getElementById('story-speaker-role').innerText = `Captain ${gameState.captain.name}'s Log:`;
+            document.getElementById('story-speaker-name').innerText = `Captain ${gameState.captain.name}`;
+
+            if (eventPrompt) {
+                document.getElementById('story-narrative-box').innerHTML = eventPrompt.narrative;
+                renderEventChoices(eventPrompt.choices);
+            } else {
+                document.getElementById('story-narrative-box').innerHTML = `
+                    The morning sun breaks across the rolling plains. The wagon wheels creak steadily over the rutted earth. 
+                    Your party travels at a <strong>${gameState.pace}</strong> pace under <strong>${gameState.weather}</strong> skies. 
+                    Keep a vigilant eye on companion health, grazing pastures, and river currents ahead.
+                `;
+                renderStandardChoices();
+            }
+            updateLedgerDisplay();
+        }
+
+        function renderStandardChoices() {
+            const choices = document.getElementById('choices-container');
+            choices.innerHTML = `
+                <button onclick="advanceTrailDay()" class="action-card p-2 rounded flex items-center space-x-2">
+                    <i data-lucide="compass" class="w-4 h-4 text-missionBrass"></i>
+                    <span class="font-cinzel text-xs font-bold text-missionWood">Press Forward (1 Day)</span>
+                </button>
+                <button onclick="cyclePace()" class="action-card p-2 rounded flex items-center space-x-2">
+                    <i data-lucide="gauge" class="w-4 h-4 text-missionBrass"></i>
+                    <span class="font-cinzel text-xs font-bold text-missionWood">Pace: ${gameState.pace}</span>
+                </button>
+                <button onclick="cycleRations()" class="action-card p-2 rounded flex items-center space-x-2">
+                    <i data-lucide="utensils" class="w-4 h-4 text-missionBrass"></i>
+                    <span class="font-cinzel text-xs font-bold text-missionWood">Rations: ${gameState.rations}</span>
+                </button>
+                <button onclick="promptCampRest()" class="action-card p-2 rounded flex items-center space-x-2">
+                    <i data-lucide="tent" class="w-4 h-4 text-missionBrass"></i>
+                    <span class="font-cinzel text-xs font-bold text-missionWood">Camp & Rest</span>
+                </button>
+            `;
+            lucide.createIcons();
+        }
+
+        function renderEventChoices(choicesList) {
+            const choices = document.getElementById('choices-container');
+            choices.innerHTML = '';
+            choicesList.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'action-card p-2.5 rounded text-left flex items-center space-x-2';
+                btn.innerHTML = `
+                    <i data-lucide="arrow-right-circle" class="w-4 h-4 text-missionBrass shrink-0"></i>
+                    <span class="font-cinzel text-xs font-bold text-missionWood">${choice.label}</span>
+                `;
+                btn.onclick = () => {
+                    audio.click();
+                    choice.action();
+                };
+                choices.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        /* =========================================================================
+           6. TRAIL ENGINE: CONSUMPTION, MORALE, HEALTH & EPITAPHS
+           ========================================================================= */
+        function advanceTrailDay() {
+            audio.wagonCreak();
+            gameState.date.setDate(gameState.date.getDate() + 1);
+
+            // Distance calculation
+            let baseMiles = 15;
+            if (gameState.pace === 'Strenuous') baseMiles = 21;
+            if (gameState.pace === 'Grueling') baseMiles = 28;
+
+            const oxenEfficiency = Math.max(0.3, gameState.oxenStamina / 100);
+            const actualMiles = Math.round(baseMiles * oxenEfficiency);
+            gameState.miles += actualMiles;
+
+            // Oxen stamina decay
+            let staminaDrain = gameState.pace === 'Grueling' ? 7 : (gameState.pace === 'Strenuous' ? 4 : 2);
+            gameState.oxenStamina = Math.max(0, gameState.oxenStamina - staminaDrain);
+
+            // Food consumption
+            let foodPerPerson = gameState.rations === 'Plentiful' ? 3 : (gameState.rations === 'Normal' ? 2 : 1);
+            let aliveCount = gameState.companions.filter(c => c.status !== 'Perished').length + (gameState.captain.health > 0 ? 1 : 0);
+            gameState.food = Math.max(0, gameState.food - (foodPerPerson * aliveCount));
+
+            // Starvation impact
+            if (gameState.food === 0) {
+                gameState.captain.health = Math.max(0, gameState.captain.health - 12);
+                gameState.companions.forEach(c => {
+                    if (c.status !== 'Perished') c.health = Math.max(0, c.health - 16);
+                });
+            }
+
+            // Oxen milestone achievement
+            if (gameState.miles >= 1000 && gameState.oxenCount >= 3) {
+                unlockBadge('iron_yoke');
+            }
+
+            // Check Milestone Encounters
+            const currentMilestone = getCurrentMilestone();
+            if (gameState.miles >= currentMilestone.miles && !currentMilestone.passed) {
+                currentMilestone.passed = true;
+                handleMilestoneEncounter(currentMilestone);
+                return;
+            }
+
+            // Random Perils / Calamities
+            if (Math.random() < 0.22) {
+                triggerRandomEncounter();
+                return;
+            }
+
+            // Check Mortality & Victory
+            checkPartyMortality();
+            if (gameState.miles >= gameState.targetMiles) {
+                concludeExpedition();
+                return;
+            }
+
+            showStandardTrailScene();
+        }
+
+        function triggerRandomEncounter() {
+            const encounters = [
+                {
+                    title: 'Broken Wagon Wheel',
+                    narrative: 'A loud crack sounds beneath the wagon bed! The right front wheel has shattered upon a jagged limestone shelf.',
+                    portrait: 'vance',
+                    choices: [
+                        {
+                            label: gameState.parts > 0 ? 'Replace with Spare Part (-1 Set)' : 'Hew Replacement from Cottonwood (Delays 2 Days)',
+                            action: () => {
+                                if (gameState.parts > 0) {
+                                    gameState.parts--;
+                                    audio.fanfare();
+                                } else {
+                                    gameState.date.setDate(gameState.date.getDate() + 2);
+                                    gameState.oxenStamina = Math.max(0, gameState.oxenStamina - 10);
+                                    audio.wagonCreak();
+                                }
+                                showStandardTrailScene();
+                            }
+                        }
+                    ]
+                },
+                {
+                    title: 'Cholera Outbreak in Camp',
+                    narrative: 'Tainted river water has stricken your companion with violent cramps and fever. Their strength fails by the hour.',
+                    portrait: 'sterling',
+                    choices: [
+                        {
+                            label: gameState.medicine > 0 ? 'Administer Opium & Laudanum (-1 Medicine)' : 'Provide Clean Boiled Broth & Bedrest',
+                            action: () => {
+                                const victim = gameState.companions.find(c => c.status !== 'Perished');
+                                if (victim) {
+                                    if (gameState.medicine > 0) {
+                                        gameState.medicine--;
+                                        victim.health = Math.min(100, victim.health + 20);
+                                        victim.status = 'Healthy';
+                                        unlockBadge('physician');
+                                    } else {
+                                        victim.health = Math.max(0, victim.health - 30);
+                                        victim.status = 'Cholera';
+                                    }
+                                }
+                                checkPartyMortality();
+                                showStandardTrailScene();
+                            }
+                        }
+                    ]
+                },
+                {
+                    title: 'Pawnee Buffalo Hunters',
+                    narrative: 'A friendly band of Pawnee hunters rides abreast your company. They offer sun-dried pemmican in exchange for powder and lead.',
+                    portrait: 'guide',
+                    choices: [
+                        {
+                            label: 'Trade 5 Boxes Ammo for 120 lbs Dried Pemmican',
+                            action: () => {
+                                if (gameState.ammo >= 5) {
+                                    gameState.ammo -= 5;
+                                    gameState.food += 120;
+                                    audio.fanfare();
+                                }
+                                showStandardTrailScene();
+                            }
+                        },
+                        {
+                            label: 'Wave Cordially and Continue Forward',
+                            action: () => showStandardTrailScene()
+                        }
+                    ]
+                }
+            ];
+
+            const enc = encounters[Math.floor(Math.random() * encounters.length)];
+            document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits[enc.portrait]();
+            document.getElementById('story-narrative-box').innerHTML = enc.narrative;
+            renderEventChoices(enc.choices);
+        }
+
+        function handleMilestoneEncounter(milestone) {
+            audio.fanfare();
+            if (milestone.type === 'river') {
+                document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits.guide();
+                document.getElementById('story-narrative-box').innerHTML = `
+                    You have arrived at the treacherous <strong>${milestone.name}</strong>. Muddy torrents surge across the channel. 
+                    Local river pilots offer flatboat ferrying, or you may risk caulking your wagon box to float across.
+                `;
+                renderEventChoices([
+                    {
+                        label: 'Caulk Wagon Box and Float Across (Free - Perilous)',
+                        action: () => {
+                            if (Math.random() > 0.35) {
+                                unlockBadge('river_master');
+                                alert("Success! Your prairie schooner floated cleanly across the swift waters.");
+                                showStandardTrailScene();
+                            } else {
+                                audio.dirge();
+                                gameState.food = Math.max(0, gameState.food - 75);
+                                gameState.oxenStamina = Math.max(0, gameState.oxenStamina - 20);
+                                alert("The river swamped your wagon! 75 lbs of flour and supplies swept away.");
+                                showStandardTrailScene();
+                            }
+                        }
+                    },
+                    {
+                        label: 'Pay Shoshone Ferry Pilot ($10 Cash)',
+                        action: () => {
+                            if (gameState.cash >= 10) {
+                                gameState.cash -= 10;
+                                unlockBadge('river_master');
+                                showStandardTrailScene();
+                            } else {
+                                alert("You lack the coin to pay the ferryman!");
+                            }
+                        }
+                    },
+                    {
+                        label: 'Camp and Wait for Waters to Fall (Rest 3 Days)',
+                        action: () => {
+                            gameState.date.setDate(gameState.date.getDate() + 3);
+                            gameState.oxenStamina = Math.min(100, gameState.oxenStamina + 20);
+                            showStandardTrailScene();
+                        }
+                    }
+                ]);
+            } else {
+                document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits.merchant();
+                document.getElementById('story-narrative-box').innerHTML = `
+                    The unmistakable grandeur of <strong>${milestone.name}</strong> rises against the western horizon! 
+                    Pioneers carve their family names into the weathered rock face. Your party gathers renewed courage for the mountain passes ahead.
+                `;
+                renderEventChoices([
+                    {
+                        label: 'Carve Names into the Stone & March West',
+                        action: () => showStandardTrailScene()
+                    }
+                ]);
+            }
+        }
+
+        function checkPartyMortality() {
+            // Check companions
+            gameState.companions.forEach(c => {
+                if (c.status !== 'Perished' && c.health <= 0) {
+                    c.status = 'Perished';
+                    audio.dirge();
+                    showMemorialService(c.name);
+                }
+            });
+
+            // Check if Sole Survivor
+            const aliveCompanions = gameState.companions.filter(c => c.status !== 'Perished');
+            if (aliveCompanions.length === 0 && gameState.captain.health > 0) {
+                unlockBadge('sole_survivor');
+            }
+
+            // Check Captain death
+            if (gameState.captain.health <= 0) {
+                concludeExpedition(true);
+            }
+        }
+
+        function showMemorialService(name) {
+            document.getElementById('memorial-text').innerText = `
+                "In solemn memory of ${name}, who endured the grueling miles of the Oregon Trail. 
+                A simple wooden cross marks their resting place beneath the prairie wind."
+            `;
+            openModal('memorial-modal');
+        }
+
+        /* =========================================================================
+           7. INTERACTIVE HUNTING MINIGAME
+           ========================================================================= */
+        let huntMeatAcquired = 0;
+        let huntActive = false;
+
+        function startHuntingMinigame() {
+            if (gameState.ammo <= 0) {
+                alert("You have no ammunition left for hunting!");
+                return;
+            }
+            huntMeatAcquired = 0;
+            huntActive = true;
+            document.getElementById('hunt-ammo-display').innerText = gameState.ammo;
+            document.getElementById('hunt-meat-display').innerText = `${huntMeatAcquired} lbs`;
+            openModal('hunt-modal');
+
+            const target = document.getElementById('hunt-target-entity');
+            target.onclick = (e) => {
+                e.stopPropagation();
+                fireMusketShot(true);
+            };
+            document.getElementById('hunting-gallery').onclick = () => {
+                fireMusketShot(false);
+            };
+
+            animateHuntTarget();
+        }
+
+        function animateHuntTarget() {
+            if (!huntActive) return;
+            const target = document.getElementById('hunt-target-entity');
+            const gallery = document.getElementById('hunting-gallery');
+            const maxX = gallery.clientWidth - 100;
+            const maxY = gallery.clientHeight - 80;
+            const randX = Math.floor(Math.random() * maxX);
+            const randY = Math.floor(Math.random() * (maxY - 140)) + 140;
+
+            target.style.left = `${randX}px`;
+            target.style.top = `${randY}px`;
+            setTimeout(animateHuntTarget, 1500);
+        }
+
+        function fireMusketShot(hit) {
+            if (gameState.ammo <= 0) return;
+            audio.gunshot();
+            gameState.ammo--;
+            document.getElementById('hunt-ammo-display').innerText = gameState.ammo;
+
+            const flash = document.getElementById('hunt-shot-flash');
+            flash.style.opacity = '1';
+            setTimeout(() => flash.style.opacity = '0', 70);
+
+            if (hit) {
+                const meat = Math.floor(Math.random() * 45) + 65;
+                huntMeatAcquired += meat;
+                document.getElementById('hunt-meat-display').innerText = `${huntMeatAcquired} lbs`;
+
+                const fb = document.getElementById('hunt-feedback');
+                fb.innerText = `Direct Hit! +${meat} lbs Provisions`;
+                fb.style.opacity = '1';
+                setTimeout(() => fb.style.opacity = '0', 1000);
+            }
+        }
+
+        function finishHunting() {
+            huntActive = false;
+            gameState.food += huntMeatAcquired;
+            if (huntMeatAcquired >= 150) {
+                unlockBadge('sharpshooter');
+            }
+            closeModal('hunt-modal');
+            updateLedgerDisplay();
+            showStandardTrailScene();
+        }
+
+        /* =========================================================================
+           8. 8 ILLUSTRATED ENDINGS SYSTEM
+           ========================================================================= */
+        function concludeExpedition(captainPerished = false) {
+            audio.fanfare();
+            const aliveCount = gameState.companions.filter(c => c.status !== 'Perished').length;
+            let endingId = 1;
+
+            if (captainPerished || (aliveCount === 0 && gameState.captain.health <= 0)) {
+                endingId = 5; // The Lost Expedition
+            } else if (aliveCount === 0 && gameState.captain.health > 0) {
+                endingId = 2; // Sole Survivor
+            } else if (gameState.oxenCount <= 1 && gameState.food < 50) {
+                endingId = 7; // Stranded Pioneers
+            } else if (gameState.captain.jobId === 'physician' || gameState.captain.jobId === 'carpenter') {
+                endingId = 4; // Valley Healer / Town Founder
+            } else if (gameState.cash >= 400 && gameState.miles >= 1390 && gameState.miles < 1800) {
+                endingId = 6; // Trading Post Tycoon
+            } else if (gameState.food > 350 && aliveCount === 4) {
+                endingId = 1; // Pioneer Dynasty
+                unlockBadge('bountiful');
+            } else if (gameState.captain.jobId === 'trapper') {
+                endingId = 8; // Prairie Ghost Legend
+            } else {
+                endingId = 3; // Gold Rush Fever
+            }
+
+            renderEndingScene(endingId);
+        }
+
+        function renderEndingScene(endingId) {
+            const endings = {
+                1: {
+                    title: 'Ending 1 of 8: The Pioneer Dynasty',
+                    desc: 'Every member of your party survived the 2,000-mile odyssey! You staked 640 prime acres in the lush Willamette Valley. Within five years, your homestead flourishes with apple orchards, healthy cattle, and a thriving mill.',
+                    svg: `
+                        <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                            <defs><linearGradient id="eg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4a7090"/><stop offset="100%" stop-color="#d5e8ca"/></linearGradient></defs>
+                            <rect width="600" height="300" fill="url(#eg1)"/>
+                            <path d="M 0 160 Q 200 120, 600 140 L 600 300 L 0 300 Z" fill="#2d5e27"/>
+                            <rect x="230" y="150" width="130" height="75" fill="#694026" stroke="#2b1a0e" stroke-width="2"/>
+                            <polygon points="215,150 295,105 375,150" fill="#8c2d19"/>
+                            <text x="300" y="65" text-anchor="middle" font-family="Cinzel" font-size="18" font-weight="bold" fill="#1b3d17">THE PIONEER DYNASTY</text>
+                        </svg>
+                    `
+                },
+                2: {
+                    title: "Ending 2 of 8: The Sole Survivor's Burden",
+                    desc: "You reached the Pacific slope alone. Your beloved companions rest beneath wooden crosses across the Sweetwater and Snake rivers. You built a quiet cabin high in the timber, forever honoring their memory.",
+                    svg: `
+                        <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                            <rect width="600" height="300" fill="#1c242b"/>
+                            <path d="M 0 180 Q 300 150, 600 170 L 600 300 L 0 300 Z" fill="#141a1f"/>
+                            <line x1="280" y1="210" x2="280" y2="250" stroke="#f5ebd7" stroke-width="4"/>
+                            <line x1="270" y1="225" x2="290" y2="225" stroke="#f5ebd7" stroke-width="4"/>
+                            <text x="300" y="75" text-anchor="middle" font-family="Cinzel" font-size="18" font-weight="bold" fill="#dfcaa7">SOLE SURVIVOR'S SOLITUDE</text>
+                        </svg>
+                    `
+                },
+                3: {
+                    title: 'Ending 3 of 8: Gold Rush Fever',
+                    desc: 'Word reached your wagon train of dazzling placer gold at Sutter’s Mill! Turning south toward California, your party staked rich claims along the American River, trading pioneer farming for mountain fortunes.',
+                    svg: `
+                        <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                            <rect width="600" height="300" fill="#3b2d1d"/>
+                            <path d="M 0 170 Q 250 140, 600 160 L 600 300 L 0 300 Z" fill="#694f2d"/>
+                            <circle cx="300" cy="180" r="45" fill="#f5cb5c" stroke="#c29b38" stroke-width="4"/>
+                            <text x="300" y="70" text-anchor="middle" font-family="Cinzel" font-size="18" font-weight="bold" fill="#f5cb5c">CALIFORNIA GOLD RUSH</text>
+                        </svg>
+                    `
+                },
+                4: {
+                    title: 'Ending 4 of 8: The Town Founders',
+                    desc: 'Your professional knowledge saved dozens of neighboring emigrants. Upon reaching the Willamette Falls, you established the territory’s first hospital and chartered schoolhouse, becoming revered civic leaders.',
+                    svg: `
+                        <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                            <rect width="600" height="300" fill="#2d4239"/>
+                            <path d="M 0 160 Q 300 130, 600 150 L 600 300 L 0 300 Z" fill="#3a5a4c"/>
+                            <rect x="220" y="140" width="160" height="90" fill="#dfcaa7" stroke="#1d1107" stroke-width="2"/>
+                            <polygon points="205,140 300,90 395,140" fill="#7a1f1d"/>
+                            <text x="300" y="65" text-anchor="middle" font-family="Cinzel" font-size="18" font-weight="bold" fill="#f5ebd7">OREGON TOWN FOUNDERS</text>
+                        </svg>
+                    `
+                },
+                5: {
+                    title: 'Ending 5 of 8: The Lost Expedition',
+                    desc: 'Bitter early blizzards in the Blue Mountains halted your company. Supplies exhausted, the party succumbed to the wilderness—joining the tragic frontier legends carved into mountain lore.',
+                    svg: `
+                        <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                            <rect width="600" height="300" fill="#0f141c"/>
+                            <polygon points="0,200 150,110 300,200 450,90 600,200 600,300 0,300" fill="#4a5d6e"/>
+                            <text x="300" y="75" text-anchor="middle" font-family="Cinzel" font-size="18" font-weight="bold" fill="#7a1f1d">THE LOST EXPEDITION</text>
+                        </svg>
+                    `
+                },
+                6: {
+                    title: 'Ending 6 of 8: Frontier Trading Tycoons',
+                    desc: 'Recognizing the relentless tide of emigrants, you halted at Fort Hall and bought out the British factor. Your supply post supplied ten thousand subsequent wagons, making your family wealthy merchants.',
+                    svg: `
+                        <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                            <rect width="600" height="300" fill="#2a1f16"/>
+                            <rect x="180" y="130" width="240" height="100" fill="#523924" stroke="#1c1109" stroke-width="3"/>
+                            <text x="300" y="75" text-anchor="middle" font-family="Cinzel" font-size="18" font-weight="bold" fill="#c29b38">TRADING POST TYCOONS</text>
+                        </svg>
+                    `
+                },
+                7: {
+                    title: 'Ending 7 of 8: Rescued Stranded Pioneers',
+                    desc: 'With your oxen perished and wagon dismantled for firewood, a friendly Nez Perce band guided your exhausted family safely into the missionary station at Walla Walla.',
+                    svg: `
+                        <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                            <rect width="600" height="300" fill="#322822"/>
+                            <path d="M 0 170 Q 300 140, 600 165 L 600 300 L 0 300 Z" fill="#4d3a2f"/>
+                            <text x="300" y="75" text-anchor="middle" font-family="Cinzel" font-size="18" font-weight="bold" fill="#dfcaa7">STRANDED & ADOPTED</text>
+                        </svg>
+                    `
+                },
+                8: {
+                    title: 'Ending 8 of 8: The Prairie Ghost Legend',
+                    desc: 'Forsaking settled homesteads, you embraced the boundless frontier—living alongside mountain men and trappers, a legendary figure forever spoken of around western campfires.',
+                    svg: `
+                        <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                            <rect width="600" height="300" fill="#0d1117"/>
+                            <circle cx="300" cy="110" r="45" fill="#f5ebd7" opacity="0.8"/>
+                            <text x="300" y="235" text-anchor="middle" font-family="Cinzel" font-size="18" font-weight="bold" fill="#dfcaa7">THE PRAIRIE GHOST LEGEND</text>
+                        </svg>
+                    `
+                }
+            };
+
+            const end = endings[endingId];
+            document.getElementById('scene-illustration-viewport').innerHTML = end.svg;
+            document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits[gameState.captain.portrait]();
+            document.getElementById('story-speaker-role').innerText = end.title;
+            document.getElementById('story-narrative-box').innerHTML = end.desc;
+
+            const choices = document.getElementById('choices-container');
+            choices.innerHTML = `
+                <button onclick="openModal('badges-modal')" class="action-card p-3 rounded font-cinzel font-bold text-center text-missionWood">
+                    View Earned Badges of Honor
+                </button>
+                <button onclick="location.reload()" class="action-card p-3 rounded font-cinzel font-bold text-center bg-missionWood text-missionParchment hover:bg-black">
+                    Embark on a New Journey
+                </button>
+            `;
+        }
+
+        /* =========================================================================
+           9. HELPERS, HUD & ROSTER CUSTOMIZATION
+           ========================================================================= */
+        function getCurrentMilestone() {
+            return gameState.milestones.find(m => gameState.miles <= m.miles) || gameState.milestones[gameState.milestones.length - 1];
+        }
+
+        function getMilestoneIllustration(m) {
+            if (m.type === 'river') {
+                return `
+                    <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                        <rect width="600" height="300" fill="#29444d"/>
+                        <path d="M 0 150 Q 200 120, 600 140 L 600 300 L 0 300 Z" fill="#1c3036"/>
+                        <path d="M 0 190 Q 250 160, 600 180 L 600 300 L 0 300 Z" fill="#2d5863" opacity="0.8"/>
+                    </svg>
+                `;
+            }
+            if (m.type === 'mountain') {
+                return `
+                    <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                        <defs><linearGradient id="mtnS" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b85d38"/><stop offset="100%" stop-color="#ecc18c"/></linearGradient></defs>
+                        <rect width="600" height="300" fill="url(#mtnS)"/>
+                        <polygon points="260,220 290,70 310,70 340,220" fill="#694026"/>
+                        <polygon points="0,230 600,230 600,300 0,300" fill="#4d321d"/>
+                    </svg>
+                `;
+            }
+            return `
+                <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
+                    <defs><linearGradient id="prair" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3c6382"/><stop offset="100%" stop-color="#f8c291"/></linearGradient></defs>
+                    <rect width="600" height="300" fill="url(#prair)"/>
+                    <path d="M 0 170 Q 200 120, 400 160 T 600 140 L 600 300 L 0 300 Z" fill="#4d5a32"/>
+                    <path d="M 0 200 Q 250 170, 600 190 L 600 300 L 0 300 Z" fill="#364221"/>
+                </svg>
+            `;
+        }
+
+        function cyclePace() {
+            audio.click();
+            if (gameState.pace === 'Steady') gameState.pace = 'Strenuous';
+            else if (gameState.pace === 'Strenuous') gameState.pace = 'Grueling';
+            else gameState.pace = 'Steady';
+            document.getElementById('scene-pace-text').innerText = `Pace: ${gameState.pace} | Rations: ${gameState.rations}`;
+            showStandardTrailScene();
+        }
+
+        function cycleRations() {
+            audio.click();
+            if (gameState.rations === 'Plentiful') gameState.rations = 'Normal';
+            else if (gameState.rations === 'Normal') gameState.rations = 'Barebones';
+            else gameState.rations = 'Plentiful';
+            document.getElementById('scene-pace-text').innerText = `Pace: ${gameState.pace} | Rations: ${gameState.rations}`;
+            showStandardTrailScene();
+        }
+
+        function promptCampRest() {
+            audio.pageTurn();
+            document.getElementById('story-narrative-box').innerHTML = `
+                The wagons pull into a defensive ring. Embers crackle against the quiet darkness. 
+                Resting restores oxen stamina and permits feverish companions to recover, but consumes daily rations.
+            `;
+            renderEventChoices([
+                {
+                    label: 'Rest 1 Day (+15% Oxen Stamina)',
+                    action: () => {
+                        gameState.date.setDate(gameState.date.getDate() + 1);
+                        gameState.oxenStamina = Math.min(100, gameState.oxenStamina + 15);
+                        gameState.food = Math.max(0, gameState.food - 10);
+                        showStandardTrailScene();
+                    }
+                },
+                {
+                    label: 'Rest 3 Days (+45% Oxen Stamina & Heal Sickness)',
+                    action: () => {
+                        gameState.date.setDate(gameState.date.getDate() + 3);
+                        gameState.oxenStamina = Math.min(100, gameState.oxenStamina + 45);
+                        gameState.food = Math.max(0, gameState.food - 30);
+                        gameState.companions.forEach(c => {
+                            if (c.status !== 'Perished') c.health = Math.min(100, c.health + 25);
+                        });
+                        showStandardTrailScene();
+                    }
+                },
+                {
+                    label: 'Break Camp and Press Onward',
+                    action: () => showStandardTrailScene()
+                }
+            ]);
+        }
+
+        function updateLedgerDisplay() {
+            document.getElementById('ui-miles').innerText = gameState.miles;
+            document.getElementById('ui-date').innerText = gameState.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            document.getElementById('ui-weather').innerText = gameState.weather;
+
+            // Captain
+            document.getElementById('ledger-captain-display').innerText = gameState.captain.name;
+            document.getElementById('ledger-captain-role').innerText = gameState.captain.jobTitle;
+
+            // Companions Listing
+            const compList = document.getElementById('companions-roster-list');
+            compList.innerHTML = gameState.companions.map(c => `
+                <div class="flex items-center justify-between p-1 rounded bg-[#f5ede0] border border-[#d8c29d] text-[11px]">
+                    <span class="font-cinzel ${c.status === 'Perished' ? 'line-through text-stone-500' : 'text-missionWood font-bold'}">${c.name}</span>
+                    <span class="text-[10px] font-bold ${c.status === 'Healthy' ? 'text-missionGreen' : (c.status === 'Perished' ? 'text-stone-500' : 'text-missionRed')}">
+                        ${c.status} (${c.health}%)
+                    </span>
+                </div>
+            `).join('');
+
+            // Oxen
+            document.getElementById('oxen-team-count').innerText = `${gameState.oxenCount} Yokes (${gameState.oxenCount * 2} Oxen)`;
+            document.getElementById('oxen-stamina-val').innerText = `${gameState.oxenStamina}%`;
+            document.getElementById('oxen-bar').style.width = `${gameState.oxenStamina}%`;
+
+            // Supplies
+            document.getElementById('ledger-cash').innerText = `$${gameState.cash}.00`;
+            document.getElementById('inv-food-lbs').innerText = `${gameState.food} lbs`;
+            document.getElementById('inv-ammo-boxes').innerText = `${gameState.ammo} bxs`;
+            document.getElementById('inv-parts-count').innerText = `${gameState.parts} sets`;
+            document.getElementById('inv-med-bottles').innerText = `${gameState.medicine} vials`;
+
+            // Progress Bar
+            const pct = Math.min(100, (gameState.miles / gameState.targetMiles) * 100);
+            document.getElementById('trail-progress-fill').style.width = `${pct}%`;
+
+            const nextM = getCurrentMilestone();
+            document.getElementById('footer-next-landmark').innerText = `Next Landmark: ${nextM.name} (${nextM.miles} mi)`;
+        }
+
+        function unlockBadge(badgeId) {
+            const b = gameState.badges.find(x => x.id === badgeId);
+            if (b && !b.unlocked) {
+                b.unlocked = true;
+                audio.fanfare();
+                const pill = document.getElementById('ui-badge-pill');
+                const count = gameState.badges.filter(x => x.unlocked).length;
+                pill.innerText = count;
+                renderBadgesModalList();
+            }
+        }
+
+        function renderBadgesModalList() {
+            const grid = document.getElementById('badges-list-grid');
+            grid.innerHTML = gameState.badges.map(b => `
+                <div class="p-3 rounded border-2 flex items-center space-x-3 ${b.unlocked ? 'bg-amber-100/90 border-missionBrass shadow-sm' : 'bg-stone-300/40 border-stone-400 opacity-60'}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${b.unlocked ? 'bg-missionBrass text-black' : 'bg-stone-400 text-stone-200'}">
+                        <i data-lucide="${b.icon}" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-cinzel font-bold text-xs text-missionWood">${b.title}</h4>
+                        <p class="text-[11px] text-stone-700 italic font-imfell">${b.desc}</p>
+                        <span class="text-[9px] font-cinzel font-bold ${b.unlocked ? 'text-missionGreen' : 'text-stone-500'}">
+                            ${b.unlocked ? '★ CONQUERED' : '🔒 UNDISCOVERED'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        /* =========================================================================
+           10. PRESET ROSTERS & NAME CUSTOMIZATION
+           ========================================================================= */
+        const presetFamilies = {
+            vance: {
+                captain: 'Capt. Silas Vance',
+                portrait: 'vance',
+                comps: ['Doc Abigail', 'Jebediah', 'Maeve', 'Young Clara']
+            },
+            sterling: {
+                captain: 'Doc Abigail Sterling',
+                portrait: 'sterling',
+                comps: ['Thomas', 'Prudence', 'Samuel', 'Constance']
+            },
+            clark: {
+                captain: 'Jebediah Clark',
+                portrait: 'clark',
+                comps: ['Martha', 'Ezra', 'Gideon', 'Hannah']
+            }
+        };
+
+        function loadPresetRoster(key) {
+            audio.click();
+            const p = presetFamilies[key];
+            if (!p) return;
+            document.getElementById('edit-captain-name').value = p.captain;
+            gameState.captain.portrait = p.portrait;
+            p.comps.forEach((name, i) => {
+                const el = document.getElementById(`edit-comp-${i}`);
+                if (el) el.value = name;
+            });
+        }
+
+        function saveRosterNames() {
+            audio.click();
+            const capVal = document.getElementById('edit-captain-name').value.trim();
+            if (capVal) gameState.captain.name = capVal;
+
+            gameState.companions.forEach((c, idx) => {
+                const el = document.getElementById(`edit-comp-${idx}`);
+                if (el && el.value.trim()) c.name = el.value.trim();
+            });
+
+            closeModal('roster-modal');
+            updateLedgerDisplay();
+            showStandardTrailScene();
+        }
+
+        function openModal(id) {
+            audio.pageTurn();
+            if (id === 'roster-modal') {
+                document.getElementById('edit-captain-name').value = gameState.captain.name;
+                gameState.companions.forEach((c, idx) => {
+                    const el = document.getElementById(`edit-comp-${idx}`);
+                    if (el) el.value = c.name;
+                });
+            }
+            if (id === 'badges-modal') {
+                renderBadgesModalList();
+            }
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeModal(id) {
+            audio.click();
+            document.getElementById(id).classList.remove('flex');
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function toggleFullscreen() {
+            audio.click();
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            updateAmbientCanvas();
+            showJobSelectionScene();
+            renderBadgesModalList();
+            updateLedgerDisplay();
+        });
+    </script>
+</body>
+</html>
