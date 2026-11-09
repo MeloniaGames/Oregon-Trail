@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Oregon Trail: Frontier Destiny — 1848</title>
     <!-- Tailwind CSS for robust layout and responsive utility -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <!-- Google Fonts for authentic colonial & frontier adventure typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=IM+Fell+English:ital@0;1&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Pirata+One&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -95,6 +95,20 @@
         ::-webkit-scrollbar { width: 7px; }
         ::-webkit-scrollbar-track { background: #dfcaa7; }
         ::-webkit-scrollbar-thumb { background: #8e6c46; border-radius: 3px; }
+        button:focus-visible { outline: 2px solid #f5cb5c; outline-offset: 2px; }
+        .shop-row { display:flex; align-items:center; gap:.75rem; padding:.55rem .7rem; border-radius:.3rem; background:linear-gradient(180deg,#fdf8ee,#eedbc1); border:1px solid #bfa682; transition:border-color .2s, box-shadow .2s; }
+        .shop-row.has-qty { border-color:#c29b38; box-shadow:0 0 0 1px #c29b3877; }
+        .step-btn { width:1.8rem; height:1.8rem; border-radius:.25rem; background:#21150c; color:#f5cb5c; border:1px solid #c29b38; font-weight:700; line-height:1; transition:filter .15s, opacity .15s; }
+        .step-btn:hover:not(:disabled) { filter:brightness(1.5); }
+        .step-btn:disabled { opacity:.3; cursor:not-allowed; }
+        .shop-btn { padding:.5rem .9rem; border-radius:.25rem; font-family:'Cinzel',serif; font-weight:700; font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; border:1px solid #c29b38; background:#21150c; color:#f5ebd7; transition:filter .15s; }
+        .shop-btn:hover:not(:disabled) { filter:brightness(1.4); }
+        .shop-btn:disabled { opacity:.4; cursor:not-allowed; }
+        .shop-btn.primary { background:linear-gradient(180deg,#e0b84a,#a67c1a); color:#1a120b; }
+        #toast { position:fixed; top:16px; left:50%; transform:translate(-50%,-24px); opacity:0; pointer-events:none; z-index:80; max-width:min(92vw,520px); padding:.55rem 1rem; border-radius:.3rem; border:1px solid #c29b38; background:#21150c; color:#f5ebd7; font-family:'Cinzel',serif; font-size:.75rem; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.6); transition:opacity .25s, transform .25s; }
+        #toast.show { opacity:1; transform:translate(-50%,0); }
+        #toast.bad { background:#7a1f1d; border-color:#f5cb5c; }
+        #toast.good { background:#2a4d32; border-color:#f5cb5c; }
     </style>
 </head>
 <body class="w-screen h-screen flex items-center justify-center p-0 md:p-3">
@@ -501,6 +515,45 @@
         </div>
     </div>
 
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <!-- OUTFITTER'S SHOP MODAL -->
+    <div id="shop-modal" class="fixed inset-0 bg-black/85 backdrop-blur-xs hidden items-center justify-center z-50 p-3">
+        <div class="bg-missionParchment max-w-3xl w-full max-h-[94vh] rounded border-4 border-missionBrass shadow-2xl parchment-panel font-baskerville flex flex-col overflow-hidden">
+            <div class="bg-missionWood text-missionParchment px-4 py-2.5 border-b-2 border-missionBrass flex items-center justify-between shrink-0">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="store" class="w-5 h-5 text-missionBrassBright"></i>
+                    <h3 id="shop-title" class="font-cinzel font-bold text-sm tracking-widest uppercase text-missionBrassBright">Outfitters</h3>
+                </div>
+                <div class="flex items-center space-x-3 text-xs font-cinzel">
+                    <span>Purse: <b id="shop-cash" class="text-white">$0</b></span>
+                    <button onclick="closeShop()" aria-label="Close shop" class="text-missionParchment hover:text-missionBrassBright font-bold text-lg">✕</button>
+                </div>
+            </div>
+            <div class="px-4 pt-3 flex items-start space-x-3 shrink-0">
+                <div id="shop-portrait" class="w-12 h-14 shrink-0 rounded bg-missionWood portrait-frame overflow-hidden"></div>
+                <p id="shop-msg" class="text-xs italic text-stone-700 leading-relaxed pt-1"></p>
+            </div>
+            <div id="shop-items" class="p-4 space-y-2 overflow-y-auto flex-1"></div>
+            <div class="px-4 pb-4 pt-3 border-t-2 border-missionWood/60 space-y-2 shrink-0 bg-[#ead9bb]">
+                <div class="flex items-center justify-between text-[11px] font-cinzel text-missionWood">
+                    <span>Wagon Load</span><span id="shop-load-text">0 / 2,400 lbs</span>
+                </div>
+                <div class="w-full bg-[#d0be9f] rounded-full h-2.5 overflow-hidden border border-[#a89371]">
+                    <div id="shop-load-bar" class="h-full transition-all duration-300" style="width:0%"></div>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <div class="text-xs font-cinzel text-missionWood">Basket: <b id="shop-total">$0</b> &nbsp;·&nbsp; Purse after: <b id="shop-after">$0</b></div>
+                    <div class="flex gap-2">
+                        <button id="shop-haggle-btn" onclick="haggle()" class="shop-btn">Haggle</button>
+                        <button onclick="clearCart()" class="shop-btn">Clear</button>
+                        <button id="shop-confirm-btn" onclick="confirmPurchase()" class="shop-btn primary">Pay &amp; Load Wagon</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MEMORIAL / BURIAL EPITAPH MODAL -->
     <div id="memorial-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
         <div class="bg-missionParchment max-w-md w-full rounded border-4 border-missionBrass p-6 text-center space-y-4 parchment-panel font-baskerville">
@@ -512,7 +565,7 @@
                 "Here lies a beloved pioneer who gave their all upon the Great Plains..."
             </p>
             <div class="pt-2 border-t border-[#c5b091]">
-                <button onclick="closeModal('memorial-modal'); showStandardTrailScene();" class="px-5 py-2 bg-missionWood hover:bg-black text-missionParchment font-cinzel font-bold text-xs uppercase tracking-wider rounded border border-missionBrass">
+                <button onclick="closeModal('memorial-modal'); if (gameState.phase === 'trail' && !gameState.busy) showStandardTrailScene();" class="px-5 py-2 bg-missionWood hover:bg-black text-missionParchment font-cinzel font-bold text-xs uppercase tracking-wider rounded border border-missionBrass">
                     Bow Heads & Press Onward
                 </button>
             </div>
@@ -547,7 +600,7 @@
                     icon.setAttribute('data-lucide', 'volume-2');
                     this.click();
                 }
-                lucide.createIcons();
+                refreshIcons();
             }
             click() {
                 if (this.muted) return;
@@ -663,6 +716,16 @@
         }
         const audio = new FrontierAudioEngine();
 
+        function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
+        let toastTimer = null;
+        function toast(msg, kind = '') {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = `show ${kind}`;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { el.className = ''; }, 3400);
+        }
+
         /* =========================================================================
            2. NANO BANANA ILLUSTRATED VECTOR PORTRAIT & SCENE SUITE
            ========================================================================= */
@@ -762,6 +825,8 @@
             targetMiles: 2000,
             date: new Date(1848, 3, 12),
             weather: 'Fair & Mild',
+            phase: 'job', // job -> shop -> trail -> ended
+            busy: false,  // true while an event decision is pending
             pace: 'Steady', // Steady, Strenuous, Grueling
             rations: 'Normal', // Plentiful, Normal, Barebones
 
@@ -809,7 +874,7 @@
 
             // Historic Landmarks (Mission US Chapter System)
             milestones: [
-                { miles: 0, name: 'Independence, Missouri', type: 'outpost', passed: false },
+                { miles: 0, name: 'Independence, Missouri', type: 'outpost', passed: true },
                 { miles: 220, name: 'Kansas River Crossing', type: 'river', passed: false },
                 { miles: 460, name: 'Courthouse & Jail Rock', type: 'landmark', passed: false },
                 { miles: 554, name: 'Fort Kearny Outpost', type: 'fort', passed: false },
@@ -927,7 +992,7 @@
                 };
                 choices.appendChild(btn);
             });
-            lucide.createIcons();
+            refreshIcons();
             initAmbientParticles('fair');
         }
 
@@ -939,26 +1004,155 @@
             gameState.ammo = job.ammo;
             gameState.food = job.food;
 
-            unlockBadge('pathfinder');
             updateLedgerDisplay();
             // Allow immediate review / editing of names
             openModal('roster-modal');
             showIndependenceStoreScene();
         }
 
-        // Chapter 1: Outfitting at General Store
+        // Chapter 1: Outfitting at Matt's General Store
+        const WAGON_CAPACITY = 2400;
+        const FORT_MARKUPS = { 'Fort Kearny Outpost': 1.25, 'Fort Laramie': 1.5, 'Fort Hall Trading Post': 1.8 };
+        const SHOP_ITEMS = [
+            { id: 'oxen', name: 'Yoke of Oxen', icon: 'activity', price: 40, load: 0, max: 8, desc: 'Two sturdy oxen. Bigger teams pull farther and tire slower.', owned: () => `${gameState.oxenCount} yokes`, apply: n => { gameState.oxenCount += n; } },
+            { id: 'food', name: 'Flour & Salt Pork (100 lbs)', icon: 'wheat', price: 25, load: 100, max: 20, desc: 'Five mouths eat about 10 lbs a day. Plan for the long haul.', owned: () => `${gameState.food} lbs`, apply: n => { gameState.food += 100 * n; } },
+            { id: 'ammo', name: 'Powder & Lead (5 boxes)', icon: 'crosshair', price: 10, load: 10, max: 20, desc: 'Every shot at the prairie larder costs a box.', owned: () => `${gameState.ammo} boxes`, apply: n => { gameState.ammo += 5 * n; } },
+            { id: 'parts', name: 'Spare Wagon Parts', icon: 'wrench', price: 15, load: 25, max: 8, desc: 'A wheel, axle and tongue set for rough country.', owned: () => `${gameState.parts} sets`, apply: n => { gameState.parts += n; } },
+            { id: 'medicine', name: 'Laudanum & Quinine (2 vials)', icon: 'pill', price: 12, load: 2, max: 10, desc: 'Against cholera, fever and the flux.', owned: () => `${gameState.medicine} vials`, apply: n => { gameState.medicine += 2 * n; } }
+        ];
+        let shopCtx = null, shopCart = {};
+
+        function wagonLoad() { const g = gameState; return g.food + g.ammo * 2 + g.parts * 25 + g.medicine; }
+        function shopPrice(i) { return Math.max(1, Math.round(i.price * shopCtx.mod * shopCtx.haggle)); }
+        function cartTotal() { return SHOP_ITEMS.reduce((s, i) => s + (shopCart[i.id] || 0) * shopPrice(i), 0); }
+        function cartLoad() { return SHOP_ITEMS.reduce((s, i) => s + (shopCart[i.id] || 0) * i.load, 0); }
+        function shopRoom(i) { return i.id === 'oxen' ? 8 - gameState.oxenCount : i.max; }
+
+        function openShop(ctx) {
+            shopCtx = Object.assign({ name: "Matt's Frontier Outfitters", mod: 1, haggle: 1, haggled: false, greeting: '"Fair prices for honest folk, Captain. Mind the weight — a prairie schooner groans past 2,400 pounds."' }, ctx || {});
+            shopCart = {};
+            document.getElementById('shop-portrait').innerHTML = NanoBananaPortraits.merchant();
+            document.getElementById('shop-msg').textContent = shopCtx.greeting;
+            renderShop();
+            openModal('shop-modal');
+        }
+
+        function renderShop() {
+            const g = gameState, total = cartTotal(), load = wagonLoad() + cartLoad();
+            document.getElementById('shop-title').textContent = shopCtx.name;
+            document.getElementById('shop-cash').textContent = `$${g.cash}`;
+            document.getElementById('shop-items').innerHTML = SHOP_ITEMS.map(i => {
+                const q = shopCart[i.id] || 0, p = shopPrice(i);
+                const canAdd = q < shopRoom(i) && total + p <= g.cash && load + i.load <= WAGON_CAPACITY;
+                return `
+                <div class="shop-row ${q ? 'has-qty' : ''}">
+                    <div class="w-9 h-9 rounded bg-missionWoodLight flex items-center justify-center shrink-0 border border-missionBrass">
+                        <i data-lucide="${i.icon}" class="w-4 h-4 text-missionBrassBright"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-cinzel font-bold text-xs text-missionWood">${i.name} <span class="text-missionGreen">· $${p}</span></div>
+                        <div class="font-imfell italic text-[11px] text-stone-600 leading-snug">${i.desc}</div>
+                        <div class="text-[10px] text-stone-500 font-cinzel">You carry: ${i.owned()}</div>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button class="step-btn" aria-label="Remove one ${i.name}" onclick="shopAdjust('${i.id}', -1)" ${q ? '' : 'disabled'}>−</button>
+                        <span class="w-5 text-center font-cinzel font-bold text-sm text-missionWood">${q}</span>
+                        <button class="step-btn" aria-label="Add one ${i.name}" onclick="shopAdjust('${i.id}', 1)" ${canAdd ? '' : 'disabled'}>+</button>
+                    </div>
+                    <div class="w-14 text-right font-cinzel font-bold text-xs ${q ? 'text-missionWood' : 'text-stone-400'}">$${q * p}</div>
+                </div>`;
+            }).join('');
+            const pct = Math.min(100, load / WAGON_CAPACITY * 100);
+            const bar = document.getElementById('shop-load-bar');
+            bar.style.width = `${pct}%`;
+            bar.style.background = pct > 90 ? '#7a1f1d' : (pct > 70 ? '#c29b38' : '#2a4d32');
+            document.getElementById('shop-load-text').textContent = `${load.toLocaleString()} / ${WAGON_CAPACITY.toLocaleString()} lbs`;
+            document.getElementById('shop-total').textContent = `$${total}`;
+            document.getElementById('shop-after').textContent = `$${g.cash - total}`;
+            document.getElementById('shop-confirm-btn').disabled = total === 0;
+            document.getElementById('shop-haggle-btn').disabled = shopCtx.haggled;
+            refreshIcons();
+        }
+
+        function shopAdjust(id, d) {
+            const item = SHOP_ITEMS.find(i => i.id === id), q = shopCart[id] || 0;
+            if (d > 0) {
+                if (q >= shopRoom(item)) { toast('Matt has no more of those to spare.'); return; }
+                if (cartTotal() + shopPrice(item) > gameState.cash) { audio.dirge(); toast('You lack the coin for that.', 'bad'); return; }
+                if (wagonLoad() + cartLoad() + item.load > WAGON_CAPACITY) { toast('Your wagon can bear no more weight.', 'bad'); return; }
+                shopCart[id] = q + 1;
+            } else if (q > 0) {
+                shopCart[id] = q - 1;
+            } else return;
+            audio.click();
+            renderShop();
+        }
+
+        function clearCart() { shopCart = {}; audio.click(); renderShop(); }
+
+        function haggle() {
+            if (shopCtx.haggled) return;
+            if (cartTotal() > 0) { toast('Haggle before you fill your basket, Captain.'); return; }
+            shopCtx.haggled = true;
+            const odds = gameState.captain.jobId === 'banker' ? 0.7 : 0.5;
+            const msg = document.getElementById('shop-msg');
+            if (Math.random() < odds) {
+                shopCtx.haggle = 0.9; audio.fanfare();
+                msg.textContent = '"Hmph. You drive a hard bargain. Ten percent off — and not a penny more."';
+                toast('Matt agrees to 10% off everything.', 'good');
+            } else {
+                shopCtx.haggle = 1.1; audio.dirge();
+                msg.textContent = '"Insulting! Prices are up a tenth for wasting my morning."';
+                toast('Matt is offended. Prices rise 10%.', 'bad');
+            }
+            renderShop();
+        }
+
+        function confirmPurchase() {
+            const total = cartTotal();
+            if (!total) { toast('Your basket is empty, Captain.'); return; }
+            if (total > gameState.cash) { toast('You lack the coin for that.', 'bad'); return; }
+            SHOP_ITEMS.forEach(i => { const n = shopCart[i.id] || 0; if (n) i.apply(n); });
+            gameState.cash -= total;
+            shopCart = {};
+            const atStart = gameState.phase === 'shop';
+            closeModal('shop-modal');
+            audio.fanfare();
+            toast(`Supplies loaded for $${total}.`, 'good');
+            updateLedgerDisplay();
+            if (atStart) showIndependenceStoreScene();
+        }
+
+        function closeShop() { shopCart = {}; closeModal('shop-modal'); }
+
         function showIndependenceStoreScene() {
+            gameState.phase = 'shop';
+            gameState.busy = false;
             document.getElementById('scene-illustration-viewport').innerHTML = `
                 <svg viewBox="0 0 600 300" class="w-full h-full object-cover">
-                    <rect width="600" height="300" fill="#446075"/>
-                    <path d="M 0 170 Q 150 140, 300 165 T 600 150 L 600 300 L 0 300 Z" fill="#523e2b"/>
-                    <!-- Store Cabin -->
-                    <rect x="180" y="85" width="240" height="135" fill="#3b2515" stroke="#1d1107" stroke-width="3"/>
-                    <polygon points="160,85 300,30 440,85" fill="#6d301e" stroke="#1d1107" stroke-width="2"/>
-                    <rect x="270" y="145" width="45" height="75" fill="#1a110a"/>
-                    <rect x="210" y="120" width="38" height="38" fill="#fde047" stroke="#1a110a" stroke-width="2"/>
-                    <rect x="340" y="120" width="38" height="38" fill="#fde047" stroke="#1a110a" stroke-width="2"/>
-                    <text x="300" y="75" text-anchor="middle" font-family="Cinzel" font-size="13" font-weight="bold" fill="#f5ebd7">GENERAL OUTFITTERS</text>
+                    <defs>
+                        <linearGradient id="shopSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34506a"/><stop offset="100%" stop-color="#e8b27a"/></linearGradient>
+                        <radialGradient id="shopGlow"><stop offset="0%" stop-color="#ffe38a" stop-opacity=".9"/><stop offset="100%" stop-color="#ffe38a" stop-opacity="0"/></radialGradient>
+                    </defs>
+                    <rect width="600" height="300" fill="url(#shopSky)"/>
+                    <path d="M 0 175 Q 150 150, 300 170 T 600 158 L 600 300 L 0 300 Z" fill="#523e2b"/>
+                    <path d="M 0 215 Q 300 195, 600 212 L 600 300 L 0 300 Z" fill="#40301f"/>
+                    <rect x="170" y="92" width="260" height="128" fill="#3b2515" stroke="#1d1107" stroke-width="3"/>
+                    <polygon points="150,92 300,34 450,92" fill="#6d301e" stroke="#1d1107" stroke-width="2"/>
+                    <rect x="195" y="62" width="210" height="26" rx="2" fill="#2a1a0f" stroke="#c29b38" stroke-width="2"/>
+                    <text x="300" y="80" text-anchor="middle" font-family="Cinzel" font-size="13" font-weight="bold" fill="#f5cb5c" letter-spacing="2">GENERAL OUTFITTERS</text>
+                    <circle cx="232" cy="140" r="34" fill="url(#shopGlow)"/><circle cx="368" cy="140" r="34" fill="url(#shopGlow)"/>
+                    <rect x="214" y="122" width="36" height="36" fill="#fde047" stroke="#1a110a" stroke-width="2"/>
+                    <rect x="350" y="122" width="36" height="36" fill="#fde047" stroke="#1a110a" stroke-width="2"/>
+                    <path d="M 232 122 V 158 M 214 140 H 250 M 368 122 V 158 M 350 140 H 386" stroke="#1a110a" stroke-width="2"/>
+                    <rect x="274" y="150" width="52" height="70" fill="#1a110a"/>
+                    <rect x="150" y="212" width="300" height="9" fill="#2a1a0f"/>
+                    <rect x="108" y="180" width="34" height="42" rx="6" fill="#6b4a2b" stroke="#1d1107" stroke-width="2"/>
+                    <path d="M 108 192 H 142 M 108 208 H 142" stroke="#1d1107" stroke-width="2"/>
+                    <rect x="458" y="190" width="40" height="32" fill="#7b5a38" stroke="#1d1107" stroke-width="2"/>
+                    <rect x="470" y="168" width="34" height="22" fill="#8a6843" stroke="#1d1107" stroke-width="2"/>
+                    <path d="M 516 222 L 520 170 Q 560 150 596 170 L 592 222 Z" fill="#e9dcc0" stroke="#1d1107" stroke-width="2"/>
+                    <circle cx="534" cy="226" r="14" fill="none" stroke="#1d1107" stroke-width="3"/><circle cx="580" cy="226" r="14" fill="none" stroke="#1d1107" stroke-width="3"/>
                 </svg>
             `;
             document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits.merchant();
@@ -966,75 +1160,50 @@
             document.getElementById('current-chapter-title').innerText = 'Chapter I: Provisioning the Prairie Schooner';
             document.getElementById('story-speaker-role').innerText = 'Matt the Merchant:';
             document.getElementById('story-speaker-name').innerText = 'Storekeeper Matt';
-
             document.getElementById('story-narrative-box').innerHTML = `
-                "Greetings Captain ${gameState.captain.name}! You hold $${gameState.cash}.00 in frontier cash. 
-                Do not leave Missouri without sturdy oxen, ample flour and salted bacon, gunpowder for hunting, and spare axles for rough mountain ruts."
+                "Greetings, ${gameState.captain.name}! You hold <strong>$${gameState.cash}</strong> in frontier cash, and your wagon carries
+                <strong>${wagonLoad().toLocaleString()}</strong> of ${WAGON_CAPACITY.toLocaleString()} pounds. Do not leave Missouri without ample flour, gunpowder,
+                spare axles and medicine. The next store is hundreds of miles off, and dearer for it."
             `;
-
-            const choices = document.getElementById('choices-container');
-            choices.innerHTML = `
-                <button onclick="purchaseSupply('oxen', 40)" class="action-card p-2 rounded flex items-center justify-between">
-                    <span class="font-cinzel text-xs font-bold text-missionWood">Buy 1 Yoke Oxen ($40)</span>
-                    <span class="text-[11px] font-bold text-missionGreen">+2 Oxen</span>
+            document.getElementById('choices-container').innerHTML = `
+                <button onclick="audio.click(); openShop()" class="action-card p-2.5 rounded flex items-center justify-center space-x-2">
+                    <i data-lucide="store" class="w-4 h-4 text-missionBrass"></i>
+                    <span class="font-cinzel text-xs font-bold text-missionWood">Browse Matt's Shelves</span>
                 </button>
-                <button onclick="purchaseSupply('food', 25)" class="action-card p-2 rounded flex items-center justify-between">
-                    <span class="font-cinzel text-xs font-bold text-missionWood">Buy 100 lbs Flour/Meat ($25)</span>
-                    <span class="text-[11px] font-bold text-missionGreen">+100 lbs</span>
-                </button>
-                <button onclick="purchaseSupply('ammo', 10)" class="action-card p-2 rounded flex items-center justify-between">
-                    <span class="font-cinzel text-xs font-bold text-missionWood">Buy 5 Boxes Ammo ($10)</span>
-                    <span class="text-[11px] font-bold text-missionGreen">+5 Boxes</span>
-                </button>
-                <button onclick="purchaseSupply('parts', 15)" class="action-card p-2 rounded flex items-center justify-between">
-                    <span class="font-cinzel text-xs font-bold text-missionWood">Buy Spare Wagon Parts ($15)</span>
-                    <span class="text-[11px] font-bold text-missionGreen">+1 Spare Set</span>
-                </button>
-                <button onclick="finishOutfitting()" class="action-card p-2.5 rounded sm:col-span-2 bg-gradient-to-r from-missionBrass to-amber-600 text-black font-cinzel font-bold text-center border-missionBrass">
+                <button onclick="finishOutfitting()" class="action-card p-2.5 rounded bg-gradient-to-r from-missionBrass to-amber-600 text-black font-cinzel font-bold text-xs text-center border-missionBrass">
                     Embark on the Oregon Trail →
                 </button>
             `;
             updateLedgerDisplay();
-        }
-
-        function purchaseSupply(item, cost) {
-            if (gameState.cash < cost) {
-                audio.dirge();
-                alert("You lack the coin for this transaction!");
-                return;
-            }
-            audio.click();
-            gameState.cash -= cost;
-            if (item === 'oxen') gameState.oxenCount += 1;
-            if (item === 'food') gameState.food += 100;
-            if (item === 'ammo') gameState.ammo += 5;
-            if (item === 'parts') gameState.parts += 1;
-            updateLedgerDisplay();
-            showIndependenceStoreScene();
+            refreshIcons();
         }
 
         function finishOutfitting() {
-            if (gameState.oxenCount < 2) {
-                alert("You need at least 2 yokes of oxen to haul your laden prairie schooner!");
-                return;
-            }
-            if (gameState.food < 150) {
-                alert("You will starve within two weeks! Purchase at least 150 lbs of provisions.");
-                return;
-            }
+            if (gameState.oxenCount < 2) { audio.dirge(); toast('You need at least 2 yokes of oxen to haul your laden prairie schooner!', 'bad'); return; }
+            if (gameState.food < 150) { audio.dirge(); toast('You will starve within two weeks! Purchase at least 150 lbs of provisions.', 'bad'); return; }
             audio.fanfare();
+            gameState.phase = 'trail';
             showStandardTrailScene();
         }
 
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Escape') return;
+            ['badges-modal', 'roster-modal'].forEach(id => { if (!document.getElementById(id).classList.contains('hidden')) closeModal(id); });
+            if (!document.getElementById('shop-modal').classList.contains('hidden')) closeShop();
+        });
+
         // Standard Trail Voyage Scene (Dynamic Milestones & Decision Deck)
         function showStandardTrailScene(eventPrompt = null) {
+            if (gameState.phase === 'ended') return;
+            gameState.busy = false;
+            document.getElementById('scene-pace-text').innerText = `Pace: ${gameState.pace} | Rations: ${gameState.rations}`;
             const currentMilestone = getCurrentMilestone();
             document.getElementById('scene-illustration-viewport').innerHTML = getMilestoneIllustration(currentMilestone);
             document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits[gameState.captain.portrait]();
-            document.getElementById('scene-milestone-tag').innerText = currentMilestone.name;
+            document.getElementById('scene-milestone-tag').innerText = `En route: ${currentMilestone.name}`;
             document.getElementById('current-chapter-title').innerText = `Expedition Chapter: The Great Emigration`;
-            document.getElementById('story-speaker-role').innerText = `Captain ${gameState.captain.name}'s Log:`;
-            document.getElementById('story-speaker-name').innerText = `Captain ${gameState.captain.name}`;
+            document.getElementById('story-speaker-role').innerText = `${gameState.captain.name}'s Log:`;
+            document.getElementById('story-speaker-name').innerText = gameState.captain.name;
 
             if (eventPrompt) {
                 document.getElementById('story-narrative-box').innerHTML = eventPrompt.narrative;
@@ -1070,10 +1239,11 @@
                     <span class="font-cinzel text-xs font-bold text-missionWood">Camp & Rest</span>
                 </button>
             `;
-            lucide.createIcons();
+            refreshIcons();
         }
 
         function renderEventChoices(choicesList) {
+            gameState.busy = true;
             const choices = document.getElementById('choices-container');
             choices.innerHTML = '';
             choicesList.forEach(choice => {
@@ -1089,72 +1259,76 @@
                 };
                 choices.appendChild(btn);
             });
-            lucide.createIcons();
+            refreshIcons();
         }
 
         /* =========================================================================
            6. TRAIL ENGINE: CONSUMPTION, MORALE, HEALTH & EPITAPHS
            ========================================================================= */
+        const WEATHERS = ['Fair & Mild', 'Fair & Mild', 'Hot & Dry', 'Overcast', 'Cool Breeze', 'Rain', 'Thunderstorm'];
+        function rollWeather() {
+            if (Math.random() > 0.3) return;
+            const w = WEATHERS[Math.floor(Math.random() * WEATHERS.length)];
+            if (w === gameState.weather) return;
+            const wasWet = /Rain|Thunder/.test(gameState.weather);
+            gameState.weather = w;
+            const wet = /Rain|Thunder/.test(w);
+            if (wet !== wasWet) initAmbientParticles(wet ? 'rain' : 'fair');
+        }
+
         function advanceTrailDay() {
+            if (gameState.phase !== 'trail' || gameState.busy) return;
+            const g = gameState;
             audio.wagonCreak();
-            gameState.date.setDate(gameState.date.getDate() + 1);
+            g.date.setDate(g.date.getDate() + 1);
+            rollWeather();
 
-            // Distance calculation
-            let baseMiles = 15;
-            if (gameState.pace === 'Strenuous') baseMiles = 21;
-            if (gameState.pace === 'Grueling') baseMiles = 28;
+            // Distance: pace x team strength x stamina x weather
+            const baseMiles = g.pace === 'Grueling' ? 28 : (g.pace === 'Strenuous' ? 21 : 15);
+            const teamPower = Math.min(1.15, 0.7 + g.oxenCount * 0.075);
+            let eff = Math.max(0.3, g.oxenStamina / 100) * teamPower;
+            if (/Rain|Thunder/.test(g.weather)) eff *= 0.8;
+            g.miles = Math.min(g.targetMiles, g.miles + Math.max(3, Math.round(baseMiles * eff)));
 
-            const oxenEfficiency = Math.max(0.3, gameState.oxenStamina / 100);
-            const actualMiles = Math.round(baseMiles * oxenEfficiency);
-            gameState.miles += actualMiles;
+            // Oxen tire when pushed and recover on a steady pace
+            const drain = g.pace === 'Grueling' ? 6 : (g.pace === 'Strenuous' ? 3 : -1);
+            g.oxenStamina = Math.max(0, Math.min(100, g.oxenStamina - drain));
 
-            // Oxen stamina decay
-            let staminaDrain = gameState.pace === 'Grueling' ? 7 : (gameState.pace === 'Strenuous' ? 4 : 2);
-            gameState.oxenStamina = Math.max(0, gameState.oxenStamina - staminaDrain);
+            // Food
+            const perPerson = g.rations === 'Plentiful' ? 3 : (g.rations === 'Normal' ? 2 : 1);
+            const living = g.companions.filter(c => c.status !== 'Perished').length + (g.captain.health > 0 ? 1 : 0);
+            g.food = Math.max(0, g.food - perPerson * living);
 
-            // Food consumption
-            let foodPerPerson = gameState.rations === 'Plentiful' ? 3 : (gameState.rations === 'Normal' ? 2 : 1);
-            let aliveCount = gameState.companions.filter(c => c.status !== 'Perished').length + (gameState.captain.health > 0 ? 1 : 0);
-            gameState.food = Math.max(0, gameState.food - (foodPerPerson * aliveCount));
-
-            // Starvation impact
-            if (gameState.food === 0) {
-                gameState.captain.health = Math.max(0, gameState.captain.health - 12);
-                gameState.companions.forEach(c => {
-                    if (c.status !== 'Perished') c.health = Math.max(0, c.health - 16);
-                });
+            // Health: rations and pace; sickness and starvation bite harder
+            const delta = ({ Plentiful: 2, Normal: 1, Barebones: -2 })[g.rations] + ({ Steady: 0, Strenuous: -1, Grueling: -3 })[g.pace];
+            const adj = (h, extra = 0) => Math.max(0, Math.min(100, h + delta + extra));
+            g.captain.health = adj(g.captain.health);
+            g.companions.forEach(c => { if (c.status !== 'Perished') c.health = adj(c.health, c.affliction ? -5 : 0); });
+            if (g.food === 0) {
+                g.captain.health = Math.max(0, g.captain.health - 12);
+                g.companions.forEach(c => { if (c.status !== 'Perished') c.health = Math.max(0, c.health - 16); });
             }
 
-            // Oxen milestone achievement
-            if (gameState.miles >= 1000 && gameState.oxenCount >= 3) {
-                unlockBadge('iron_yoke');
-            }
+            if (g.miles >= 1000 && g.oxenCount >= 3) unlockBadge('iron_yoke');
 
-            // Check Milestone Encounters
-            const currentMilestone = getCurrentMilestone();
-            if (gameState.miles >= currentMilestone.miles && !currentMilestone.passed) {
-                currentMilestone.passed = true;
-                handleMilestoneEncounter(currentMilestone);
+            if (checkPartyMortality()) return;
+            if (g.miles >= g.targetMiles) { concludeExpedition(); return; }
+
+            // Landmarks: trigger on arrival, never skipped by overshooting
+            const next = getCurrentMilestone();
+            if (next.type !== 'destination' && g.miles >= next.miles) {
+                next.passed = true;
+                handleMilestoneEncounter(next);
                 return;
             }
 
-            // Random Perils / Calamities
-            if (Math.random() < 0.22) {
-                triggerRandomEncounter();
-                return;
-            }
-
-            // Check Mortality & Victory
-            checkPartyMortality();
-            if (gameState.miles >= gameState.targetMiles) {
-                concludeExpedition();
-                return;
-            }
-
+            if (Math.random() < 0.22) { triggerRandomEncounter(); return; }
             showStandardTrailScene();
         }
 
         function triggerRandomEncounter() {
+            const aliveFolk = gameState.companions.filter(c => c.status !== 'Perished');
+            const sickOne = aliveFolk[Math.floor(Math.random() * aliveFolk.length)];
             const encounters = [
                 {
                     title: 'Broken Wagon Wheel',
@@ -1179,25 +1353,25 @@
                 },
                 {
                     title: 'Cholera Outbreak in Camp',
-                    narrative: 'Tainted river water has stricken your companion with violent cramps and fever. Their strength fails by the hour.',
+                    narrative: `Tainted river water has stricken ${sickOne ? sickOne.name : 'a companion'} with violent cramps and fever. Their strength fails by the hour.`,
                     portrait: 'sterling',
                     choices: [
                         {
                             label: gameState.medicine > 0 ? 'Administer Opium & Laudanum (-1 Medicine)' : 'Provide Clean Boiled Broth & Bedrest',
                             action: () => {
-                                const victim = gameState.companions.find(c => c.status !== 'Perished');
+                                const victim = sickOne;
                                 if (victim) {
                                     if (gameState.medicine > 0) {
                                         gameState.medicine--;
                                         victim.health = Math.min(100, victim.health + 20);
-                                        victim.status = 'Healthy';
+                                        victim.affliction = null;
                                         unlockBadge('physician');
                                     } else {
                                         victim.health = Math.max(0, victim.health - 30);
-                                        victim.status = 'Cholera';
+                                        victim.affliction = 'Cholera';
                                     }
                                 }
-                                checkPartyMortality();
+                                if (checkPartyMortality()) return;
                                 showStandardTrailScene();
                             }
                         }
@@ -1227,7 +1401,8 @@
                 }
             ];
 
-            const enc = encounters[Math.floor(Math.random() * encounters.length)];
+            const pool = sickOne ? encounters : encounters.filter(e => e.title.indexOf('Cholera') < 0);
+            const enc = pool[Math.floor(Math.random() * pool.length)];
             document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits[enc.portrait]();
             document.getElementById('story-narrative-box').innerHTML = enc.narrative;
             renderEventChoices(enc.choices);
@@ -1235,10 +1410,16 @@
 
         function handleMilestoneEncounter(milestone) {
             audio.fanfare();
+            document.getElementById('scene-illustration-viewport').innerHTML = getMilestoneIllustration(milestone);
+            document.getElementById('scene-milestone-tag').innerText = milestone.name;
+            if (milestone.name.indexOf('Chimney') === 0) unlockBadge('pathfinder');
+            const portrait = document.getElementById('dialogue-portrait-frame');
+            const text = document.getElementById('story-narrative-box');
+
             if (milestone.type === 'river') {
-                document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits.guide();
-                document.getElementById('story-narrative-box').innerHTML = `
-                    You have arrived at the treacherous <strong>${milestone.name}</strong>. Muddy torrents surge across the channel. 
+                portrait.innerHTML = NanoBananaPortraits.guide();
+                text.innerHTML = `
+                    You have arrived at the treacherous <strong>${milestone.name}</strong>. Muddy torrents surge across the channel.
                     Local river pilots offer flatboat ferrying, or you may risk caulking your wagon box to float across.
                 `;
                 renderEventChoices([
@@ -1247,15 +1428,14 @@
                         action: () => {
                             if (Math.random() > 0.35) {
                                 unlockBadge('river_master');
-                                alert("Success! Your prairie schooner floated cleanly across the swift waters.");
-                                showStandardTrailScene();
+                                toast('Success! Your prairie schooner floated cleanly across the swift waters.', 'good');
                             } else {
                                 audio.dirge();
                                 gameState.food = Math.max(0, gameState.food - 75);
                                 gameState.oxenStamina = Math.max(0, gameState.oxenStamina - 20);
-                                alert("The river swamped your wagon! 75 lbs of flour and supplies swept away.");
-                                showStandardTrailScene();
+                                toast('The river swamped your wagon! 75 lbs of flour and supplies swept away.', 'bad');
                             }
+                            showStandardTrailScene();
                         }
                     },
                     {
@@ -1266,7 +1446,7 @@
                                 unlockBadge('river_master');
                                 showStandardTrailScene();
                             } else {
-                                alert("You lack the coin to pay the ferryman!");
+                                toast('You lack the coin to pay the ferryman!', 'bad');
                             }
                         }
                     },
@@ -1275,45 +1455,57 @@
                         action: () => {
                             gameState.date.setDate(gameState.date.getDate() + 3);
                             gameState.oxenStamina = Math.min(100, gameState.oxenStamina + 20);
+                            gameState.food = Math.max(0, gameState.food - 30);
                             showStandardTrailScene();
                         }
                     }
                 ]);
-            } else {
-                document.getElementById('dialogue-portrait-frame').innerHTML = NanoBananaPortraits.merchant();
-                document.getElementById('story-narrative-box').innerHTML = `
-                    The unmistakable grandeur of <strong>${milestone.name}</strong> rises against the western horizon! 
-                    Pioneers carve their family names into the weathered rock face. Your party gathers renewed courage for the mountain passes ahead.
+            } else if (milestone.type === 'fort') {
+                portrait.innerHTML = NanoBananaPortraits.merchant();
+                const mod = FORT_MARKUPS[milestone.name] || 1.3;
+                text.innerHTML = `
+                    The palisades of <strong>${milestone.name}</strong> rise from the plain. The sutler's store is open to emigrants,
+                    though prices run <strong>${Math.round((mod - 1) * 100)}% above</strong> what Missouri charges. Resupply here, or press on.
                 `;
                 renderEventChoices([
                     {
-                        label: 'Carve Names into the Stone & March West',
-                        action: () => showStandardTrailScene()
-                    }
+                        label: 'Browse the Fort Store (Resupply)',
+                        action: () => openShop({ name: `${milestone.name} Store`, mod, greeting: '"Out here the nearest rival is hundreds of miles off, friend. Pay the price or go without."' })
+                    },
+                    {
+                        label: 'Rest a Day Within the Walls (+15% Oxen Stamina)',
+                        action: () => {
+                            gameState.date.setDate(gameState.date.getDate() + 1);
+                            gameState.oxenStamina = Math.min(100, gameState.oxenStamina + 15);
+                            gameState.food = Math.max(0, gameState.food - 10);
+                            showStandardTrailScene();
+                        }
+                    },
+                    { label: 'Press Onward', action: () => showStandardTrailScene() }
                 ]);
+            } else {
+                portrait.innerHTML = NanoBananaPortraits.merchant();
+                text.innerHTML = `
+                    The unmistakable grandeur of <strong>${milestone.name}</strong> rises against the western horizon!
+                    Pioneers carve their family names into the weathered rock face. Your party gathers renewed courage for the miles ahead.
+                `;
+                renderEventChoices([{ label: 'Carve Names into the Stone & March West', action: () => showStandardTrailScene() }]);
             }
         }
 
         function checkPartyMortality() {
-            // Check companions
-            gameState.companions.forEach(c => {
+            const g = gameState;
+            g.companions.forEach(c => {
                 if (c.status !== 'Perished' && c.health <= 0) {
                     c.status = 'Perished';
+                    c.affliction = null;
                     audio.dirge();
                     showMemorialService(c.name);
                 }
             });
-
-            // Check if Sole Survivor
-            const aliveCompanions = gameState.companions.filter(c => c.status !== 'Perished');
-            if (aliveCompanions.length === 0 && gameState.captain.health > 0) {
-                unlockBadge('sole_survivor');
-            }
-
-            // Check Captain death
-            if (gameState.captain.health <= 0) {
-                concludeExpedition(true);
-            }
+            if (g.companions.every(c => c.status === 'Perished') && g.captain.health > 0) unlockBadge('sole_survivor');
+            if (g.captain.health <= 0) { concludeExpedition(true); return true; }
+            return false;
         }
 
         function showMemorialService(name) {
@@ -1330,18 +1522,19 @@
         let huntMeatAcquired = 0;
         let huntActive = false;
 
+        let huntTimer = null;
         function startHuntingMinigame() {
-            if (gameState.ammo <= 0) {
-                alert("You have no ammunition left for hunting!");
-                return;
-            }
+            if (gameState.phase !== 'trail' || gameState.busy) { toast('Settle your current business before riding out to hunt.'); return; }
+            if (gameState.ammo <= 0) { toast('You have no ammunition left for hunting!', 'bad'); return; }
             huntMeatAcquired = 0;
             huntActive = true;
+            clearTimeout(huntTimer);
             document.getElementById('hunt-ammo-display').innerText = gameState.ammo;
             document.getElementById('hunt-meat-display').innerText = `${huntMeatAcquired} lbs`;
             openModal('hunt-modal');
 
             const target = document.getElementById('hunt-target-entity');
+            target.style.transition = 'left .6s ease, top .6s ease';
             target.onclick = (e) => {
                 e.stopPropagation();
                 fireMusketShot(true);
@@ -1364,7 +1557,7 @@
 
             target.style.left = `${randX}px`;
             target.style.top = `${randY}px`;
-            setTimeout(animateHuntTarget, 1500);
+            huntTimer = setTimeout(animateHuntTarget, 1400);
         }
 
         function fireMusketShot(hit) {
@@ -1391,11 +1584,16 @@
 
         function finishHunting() {
             huntActive = false;
-            gameState.food += huntMeatAcquired;
-            if (huntMeatAcquired >= 150) {
-                unlockBadge('sharpshooter');
-            }
+            clearTimeout(huntTimer);
+            const room = Math.max(0, WAGON_CAPACITY - wagonLoad());
+            const carried = Math.min(huntMeatAcquired, 200, room);
+            gameState.food += carried;
+            if (huntMeatAcquired >= 150) unlockBadge('sharpshooter');
+            // A day of hunting is a day on the trail
+            gameState.date.setDate(gameState.date.getDate() + 1);
+            gameState.food = Math.max(0, gameState.food - 10);
             closeModal('hunt-modal');
+            if (carried < huntMeatAcquired) toast(`You can only carry ${carried} of the ${huntMeatAcquired} lbs you took.`);
             updateLedgerDisplay();
             showStandardTrailScene();
         }
@@ -1406,28 +1604,21 @@
         function concludeExpedition(captainPerished = false) {
             audio.fanfare();
             const aliveCount = gameState.companions.filter(c => c.status !== 'Perished').length;
-            let endingId = 1;
-
-            if (captainPerished || (aliveCount === 0 && gameState.captain.health <= 0)) {
-                endingId = 5; // The Lost Expedition
-            } else if (aliveCount === 0 && gameState.captain.health > 0) {
-                endingId = 2; // Sole Survivor
-            } else if (gameState.oxenCount <= 1 && gameState.food < 50) {
-                endingId = 7; // Stranded Pioneers
-            } else if (gameState.captain.jobId === 'physician' || gameState.captain.jobId === 'carpenter') {
-                endingId = 4; // Valley Healer / Town Founder
-            } else if (gameState.cash >= 400 && gameState.miles >= 1390 && gameState.miles < 1800) {
-                endingId = 6; // Trading Post Tycoon
-            } else if (gameState.food > 350 && aliveCount === 4) {
-                endingId = 1; // Pioneer Dynasty
-                unlockBadge('bountiful');
-            } else if (gameState.captain.jobId === 'trapper') {
-                endingId = 8; // Prairie Ghost Legend
-            } else {
-                endingId = 3; // Gold Rush Fever
-            }
-
-            renderEndingScene(endingId);
+            const g = gameState;
+            g.phase = 'ended';
+            g.busy = false;
+            if (g.milestones.every(m => m.passed || m.type === 'destination')) unlockBadge('historian');
+            if (!captainPerished && g.food > 400) unlockBadge('bountiful');
+            let endingId;
+            if (captainPerished || (aliveCount === 0 && g.captain.health <= 0)) endingId = 5;        // The Lost Expedition
+            else if (aliveCount === 0) endingId = 2;                                                  // Sole Survivor
+            else if (g.oxenCount <= 1 && g.food < 50) endingId = 7;                                   // Stranded Pioneers
+            else if (g.food > 350 && aliveCount === 4) endingId = 1;                                  // Pioneer Dynasty
+            else if (g.captain.jobId === 'physician' || g.captain.jobId === 'carpenter') endingId = 4; // Town Founders
+            else if (g.cash >= 400) endingId = 6;                                                     // Trading Tycoons
+            else if (g.captain.jobId === 'trapper') endingId = 8;                                     // Prairie Ghost
+            else endingId = 3;                                                                        // Gold Rush Fever
+                        renderEndingScene(endingId);
         }
 
         function renderEndingScene(endingId) {
@@ -1551,7 +1742,7 @@
            9. HELPERS, HUD & ROSTER CUSTOMIZATION
            ========================================================================= */
         function getCurrentMilestone() {
-            return gameState.milestones.find(m => gameState.miles <= m.miles) || gameState.milestones[gameState.milestones.length - 1];
+            return gameState.milestones.find(m => !m.passed) || gameState.milestones[gameState.milestones.length - 1];
         }
 
         function getMilestoneIllustration(m) {
@@ -1603,6 +1794,7 @@
         }
 
         function promptCampRest() {
+            if (gameState.phase !== 'trail' || gameState.busy) return;
             audio.pageTurn();
             document.getElementById('story-narrative-box').innerHTML = `
                 The wagons pull into a defensive ring. Embers crackle against the quiet darkness. 
@@ -1624,8 +1816,9 @@
                         gameState.date.setDate(gameState.date.getDate() + 3);
                         gameState.oxenStamina = Math.min(100, gameState.oxenStamina + 45);
                         gameState.food = Math.max(0, gameState.food - 30);
+                        gameState.captain.health = Math.min(100, gameState.captain.health + 25);
                         gameState.companions.forEach(c => {
-                            if (c.status !== 'Perished') c.health = Math.min(100, c.health + 25);
+                            if (c.status !== 'Perished') { c.health = Math.min(100, c.health + 25); c.affliction = null; }
                         });
                         showStandardTrailScene();
                     }
@@ -1638,6 +1831,10 @@
         }
 
         function updateLedgerDisplay() {
+            gameState.companions.forEach(c => {
+                if (c.status === 'Perished') return;
+                c.status = c.affliction || (c.health >= 75 ? 'Healthy' : (c.health >= 40 ? 'Weary' : 'Gravely Ill'));
+            });
             document.getElementById('ui-miles').innerText = gameState.miles;
             document.getElementById('ui-date').innerText = gameState.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             document.getElementById('ui-weather').innerText = gameState.weather;
@@ -1646,9 +1843,15 @@
             document.getElementById('ledger-captain-display').innerText = gameState.captain.name;
             document.getElementById('ledger-captain-role').innerText = gameState.captain.jobTitle;
 
-            // Companions Listing
+            // Captain & Companions
+            const cap = gameState.captain;
+            const capOk = cap.health >= 75;
             const compList = document.getElementById('companions-roster-list');
-            compList.innerHTML = gameState.companions.map(c => `
+            compList.innerHTML = `
+                <div class="flex items-center justify-between p-1 rounded bg-[#efe0c4] border border-[#c9ab78] text-[11px]">
+                    <span class="font-cinzel text-missionWood font-bold">★ ${cap.name}</span>
+                    <span class="text-[10px] font-bold ${capOk ? 'text-missionGreen' : 'text-missionRed'}">${capOk ? 'Healthy' : (cap.health >= 40 ? 'Weary' : 'Gravely Ill')} (${cap.health}%)</span>
+                </div>` + gameState.companions.map(c => `
                 <div class="flex items-center justify-between p-1 rounded bg-[#f5ede0] border border-[#d8c29d] text-[11px]">
                     <span class="font-cinzel ${c.status === 'Perished' ? 'line-through text-stone-500' : 'text-missionWood font-bold'}">${c.name}</span>
                     <span class="text-[10px] font-bold ${c.status === 'Healthy' ? 'text-missionGreen' : (c.status === 'Perished' ? 'text-stone-500' : 'text-missionRed')}">
@@ -1661,6 +1864,9 @@
             document.getElementById('oxen-team-count').innerText = `${gameState.oxenCount} Yokes (${gameState.oxenCount * 2} Oxen)`;
             document.getElementById('oxen-stamina-val').innerText = `${gameState.oxenStamina}%`;
             document.getElementById('oxen-bar').style.width = `${gameState.oxenStamina}%`;
+            const oc = document.getElementById('ui-oxen-cond'), st = gameState.oxenStamina;
+            oc.innerText = st >= 75 ? 'Robust' : (st >= 45 ? 'Tiring' : 'Exhausted');
+            oc.className = st >= 75 ? 'text-emerald-400' : (st >= 45 ? 'text-amber-300' : 'text-red-400');
 
             // Supplies
             document.getElementById('ledger-cash').innerText = `$${gameState.cash}.00`;
@@ -1674,7 +1880,7 @@
             document.getElementById('trail-progress-fill').style.width = `${pct}%`;
 
             const nextM = getCurrentMilestone();
-            document.getElementById('footer-next-landmark').innerText = `Next Landmark: ${nextM.name} (${nextM.miles} mi)`;
+            document.getElementById('footer-next-landmark').innerText = `Next Landmark: ${nextM.name} (${Math.max(0, nextM.miles - gameState.miles)} mi)`;
         }
 
         function unlockBadge(badgeId) {
@@ -1705,7 +1911,7 @@
                     </div>
                 </div>
             `).join('');
-            lucide.createIcons();
+            refreshIcons();
         }
 
         /* =========================================================================
@@ -1753,7 +1959,8 @@
 
             closeModal('roster-modal');
             updateLedgerDisplay();
-            showStandardTrailScene();
+            if (gameState.phase === 'shop') showIndependenceStoreScene();
+            else if (gameState.phase === 'trail' && !gameState.busy) showStandardTrailScene();
         }
 
         function openModal(id) {
@@ -1770,7 +1977,7 @@
             }
             document.getElementById(id).classList.remove('hidden');
             document.getElementById(id).classList.add('flex');
-            lucide.createIcons();
+            refreshIcons();
         }
 
         function closeModal(id) {
@@ -1790,7 +1997,7 @@
 
         // INITIALIZATION
         window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+            refreshIcons();
             updateAmbientCanvas();
             showJobSelectionScene();
             renderBadgesModalList();
